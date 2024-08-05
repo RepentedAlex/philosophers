@@ -20,17 +20,40 @@
 # include <unistd.h>
 # include <sys/time.h>
 
+# define ERROR 1
+# define NO_ERROR 0
+
+typedef enum	e_states
+{
+	eating,
+	thinking,
+	sleeping
+}				t_states;
+
 typedef struct s_philosopher
 {
-	int	id;
-	int	remaining_time;
+	int						id;
+	int						state;
+	time_t					last_meal;
+	int						fork_state;
+	struct	s_philosopher	*prev;
+	struct	s_philosopher	*next;
 }				t_philosopher;
 
-typedef struct s_table
+typedef struct	s_frame
 {
-	int	number_of_philosophers;
-}				t_table;
+	long long		nb_of_philo;
+	time_t			time_to_die;
+	time_t			time_to_eat;
+	time_t			time_to_sleep;
+	long long		nb_time_eat;
+	t_philosopher	*head;
+}				t_frame;
 
-void	ft_init_table(int argc, char *argv[], t_table *table);
+int				add_to_list(t_philosopher **head, int id);
+long long		ft_atoll(const char *num);
+int				free_list(t_philosopher **head, long long nb_philo);
+int				ft_init_table(int argc, char *argv[], t_frame *frame);
+t_philosopher	*new_node(int id);
 
 #endif
