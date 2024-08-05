@@ -6,8 +6,10 @@ CC			=	gcc
 FFLAGS		=	-fsanitize=address
 IFLAGS		=	-Iinclude
 LFLAGS		=
-WFLAGS		=	-Wall -Wextra -Werror
-CFLAGS		= $(WFLAGS) $(IFLAGS) $(FFLAGS)
+WFLAGS		=	-Wall -Wextra -Werror -g3
+CFLAGS		=	$(WFLAGS) $(IFLAGS)
+CFLAGS		+=	$(FFLAGS)
+CFLAGS		+=	-MMD -MP
 
 #################
 ## DIRECTORIES ##
@@ -21,9 +23,12 @@ BLD_DIR	=	build/
 ###########
 
 NAME		=	philo
-SRC_FILES	=	philosophers
+SRC_FILES	=	philosophers \
+				utils
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_FILES)))
-OBJ			=	$(addprefix $(BUILD_DIR), $(addsuffix .o, $(SRC_FILES)))
+OBJ			=	$(addprefix $(BLD_DIR), $(addsuffix .o, $(SRC_FILES)))
+
+OBJF		=	.cache_exists
 
 ############
 ## COLORS ##
@@ -43,13 +48,30 @@ RESET		=	\033[0m
 
 all: $(NAME)
 
-$(NAME):
-	@echo -e "$(BLUE)Linking $@$(RESET)"
+$(NAME): $(OBJ)
+	@$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+	@echo "$(GREEN)$@ linked successfully! :D$(RESET)"
+
+$(BLD_DIR)%.o: $(SRC_DIR)%.c | $(OBJF)
+	@echo "$(BLUE)Compiling: $<$(RESET)"
+	@$(CC) $(CFLAGS) -c $< -o $@ $(IFLAGS)
+
+$(OBJF):
+	@mkdir -p $(BLD_DIR)
+	@mkdir -p $(addprefix $(BLD_DIR), $(dir $(SRC_FILES)))
+	@touch $(OBJF)
+	@echo "$(YELLOW)Object directory created!$(RESET)"
 
 clean:
+	@rm -rf $(BLD_DIR) $(OBJF)
+	@echo "$(MAGENTA)Build files cleaned!$(RESET)"
 
-fclean:
+fclean: clean
+	@rm -f $(NAME)
+	@echo "$(MAGENTA)$(NAME) cleaned!$(RESET)"
 
 re: fclean all
+
+-include $(OBJ:.o=.d)
 
 .PHONY: all bonus clean fclean re
