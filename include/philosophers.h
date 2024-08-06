@@ -33,9 +33,12 @@ typedef enum e_states
 typedef struct s_philosopher
 {
 	int						id;
+	int						thread_id;
 	int						state;
 	time_t					last_meal;
+	int						nb_dinner;
 	int						fork_state;
+	int						is_replete;
 	struct s_philosopher	*prev;
 	struct s_philosopher	*next;
 }				t_philosopher;
@@ -46,7 +49,10 @@ typedef struct s_frame
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
+	time_t			start_time;
 	int				nb_time_eat;
+	int				nb_philo_replete;
+	int				stop;
 	t_philosopher	*head;
 }				t_frame;
 

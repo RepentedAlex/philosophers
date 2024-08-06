@@ -13,6 +13,7 @@
 #include "initialisation.h"
 #include "utils.h"
 
+//RAJOUTER START TIME
 int	initialisation(int argc, char *argv[], t_frame *frame)
 {
 	memset(frame, 0, sizeof(*frame));
