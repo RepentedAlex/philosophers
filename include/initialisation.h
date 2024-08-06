@@ -10,21 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PHILOSOPHERS_INITIALISATION_H
-#define PHILOSOPHERS_INITIALISATION_H
+#ifndef INITIALISATION_H
+# define INITIALISATION_H
 
-#include "philosophers.h"
-
+# include "philosophers.h"
 
 //-----MAIN FUNCTION-----//
-int initialisation(int argc, char *argv[], t_frame *frame);
+int	initialisation(int argc, char *argv[], t_frame *frame);
 
-//-----SUBSIDIARIES FUNCTIONS-----//
-int set_program_parameters(int argc, char *argv[], t_frame *frame);
+//-----SUBSIDIARY FUNCTIONS-----//
+int	set_program_parameters(int argc, char *argv[], t_frame *frame);
 int	ft_init_table(t_frame *frame);
 
 //-----UTILITIES-----//
-int check_args(int argc, char *argv[], t_frame *frame);
-int check_valid_args(char *argv[]);
+int	check_args(int argc, char *argv[], t_frame *frame);
+int	check_valid_args(char *argv[]);
 
 #endif

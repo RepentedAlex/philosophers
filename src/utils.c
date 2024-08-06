@@ -12,11 +12,11 @@
 
 #include "philosophers.h"
 
-int ft_atoi(const char *num)
+int	ft_atoi(const char *num)
 {
-	int i;
-	int ret;
-	int sign;
+	int	i;
+	int	ret;
+	int	sign;
 
 	i = 0;
 	sign = 1;

@@ -1,25 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
+/*   termination.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 12:32:00 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/06 12:32:43 by apetitco         ###   ########.fr       */
+/*   Created: 2024/08/06 14:12:51 by apetitco          #+#    #+#             */
+/*   Updated: 2024/08/06 14:13:09 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_H
-# define UTILS_H
+#ifndef TERMINATION_H
+# define TERMINATION_H
 
 # include "philosophers.h"
 
-int		free_list(t_philosopher **head, long long nb_philo);
-int		ft_strncmp(const char *s1, const char *s2, size_t n);
-char	*ft_itoa(int n);
-void	*ft_calloc(size_t nmemb, size_t size);
-void	ft_bzero(void *s, size_t n);
-int		ft_isdigit(int c);
+//-----MAIN FUNCTION-----//
+int	termination(t_frame *frame);
+
+//-----SUBSIDIARY FUNCTIONS-----//
+
+//-----UTILITIES-----//
 
 #endif

@@ -13,7 +13,7 @@
 #include "initialisation.h"
 #include "utils.h"
 
-int initialisation(int argc, char *argv[], t_frame *frame)
+int	initialisation(int argc, char *argv[], t_frame *frame)
 {
 	memset(frame, 0, sizeof(*frame));
 	printf("Setting program's parameters...\n");
@@ -26,7 +26,7 @@ int initialisation(int argc, char *argv[], t_frame *frame)
 	return (printf("Program initialised.\n"), NO_ERROR);
 }
 
-int set_program_parameters(int argc, char *argv[], t_frame *frame)
+int	set_program_parameters(int argc, char *argv[], t_frame *frame)
 {
 	if (check_valid_args(argv))
 		return (ERROR);
@@ -52,10 +52,10 @@ int	ft_init_table(t_frame *frame)
 	return (NO_ERROR);
 }
 
-int check_valid_args(char *argv[])
+int	check_valid_args(char *argv[])
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = 1;
 	while (argv[i])
@@ -69,9 +69,7 @@ int check_valid_args(char *argv[])
 	return (NO_ERROR);
 }
 
-
-
-int check_args(int argc, char *argv[], t_frame *frame)
+int	check_args(int argc, char *argv[], t_frame *frame)
 {
 	char	*tmp;
 

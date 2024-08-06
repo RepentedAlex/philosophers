@@ -1,25 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
+/*   termination.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 12:32:00 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/06 12:32:43 by apetitco         ###   ########.fr       */
+/*   Created: 2024/08/06 14:12:51 by apetitco          #+#    #+#             */
+/*   Updated: 2024/08/06 14:15:09 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef UTILS_H
-# define UTILS_H
+#include "philosophers.h"
+#include "termination.h"
+#include "utils.h"
 
-# include "philosophers.h"
-
-int		free_list(t_philosopher **head, long long nb_philo);
-int		ft_strncmp(const char *s1, const char *s2, size_t n);
-char	*ft_itoa(int n);
-void	*ft_calloc(size_t nmemb, size_t size);
-void	ft_bzero(void *s, size_t n);
-int		ft_isdigit(int c);
-
-#endif
+int	termination(t_frame *frame)
+{
+	printf("\nStarting termination sequence.\n");
+	free_list(&frame->head, frame->nb_of_philo);
+	return (NO_ERROR);
+}

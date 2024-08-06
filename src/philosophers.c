@@ -12,6 +12,7 @@
 
 #include "philosophers.h"
 #include "initialisation.h"
+#include "termination.h"
 #include "debug.h"
 
 int	main(int argc, char *argv[])
@@ -20,7 +21,6 @@ int	main(int argc, char *argv[])
 
 	if (initialisation(argc, argv, &frame))
 		return (printf("An error has occurred at startup.\n"), 1);
-	dump_frame(&frame);
-	free_list(&frame.head, frame.nb_of_philo);
-	dump_frame(&frame);
+	if (termination(&frame))
+		return (printf("philo encountered an error while closing.\n"), 2);
 }
