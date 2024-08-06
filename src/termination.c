@@ -18,5 +18,5 @@ int	termination(t_frame *frame)
 {
 	printf("\nStarting termination sequence.\n");
 	free_list(&frame->head, frame->nb_of_philo);
-	return (NO_ERROR);
+	return (printf("Program terminated successfully!\n"), NO_ERROR);
 }
