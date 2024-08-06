@@ -10,11 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "philosophers.h"
 #include "initialisation.h"
 #include "utils.h"
 
 //RAJOUTER START TIME
-int	initialisation(int argc, char *argv[], t_frame *frame)
+t_error	initialisation(int argc, char *argv[], t_frame *frame)
 {
 	memset(frame, 0, sizeof(*frame));
 	printf("Setting program's parameters...\n");
@@ -27,22 +28,24 @@ int	initialisation(int argc, char *argv[], t_frame *frame)
 	return (printf("Program initialised.\n"), NO_ERROR);
 }
 
-int	set_program_parameters(int argc, char *argv[], t_frame *frame)
+t_error	set_program_parameters(int argc, char *argv[], t_frame *frame)
 {
 	if (check_valid_args(argv))
 		return (ERROR);
 	frame->nb_of_philo = ft_atoi(argv[1]);
+	if (frame->nb_of_philo < MIN_PHILO || frame->nb_of_philo > MAX_PHILO)
+		return (printf("Error: Please provide [0-200] philo.\n"), ERROR);
 	frame->time_to_die = (time_t)ft_atoi(argv[2]);
 	frame->time_to_eat = (time_t)ft_atoi(argv[3]);
 	frame->time_to_sleep = (time_t)ft_atoi(argv[4]);
 	if (argc == 6)
-		frame->nb_time_eat = ft_atoi(argv[5]);
+		frame->nb_meals = ft_atoi(argv[5]);
 	if (check_args(argc, argv, frame))
 		return (ERROR);
 	return (NO_ERROR);
 }
 
-int	ft_init_table(t_frame *frame)
+t_error	ft_init_table(t_frame *frame)
 {
 	int	i;
 
@@ -53,7 +56,7 @@ int	ft_init_table(t_frame *frame)
 	return (NO_ERROR);
 }
 
-int	check_valid_args(char *argv[])
+t_error	check_valid_args(char *argv[])
 {
 	int	i;
 	int	j;
@@ -70,7 +73,7 @@ int	check_valid_args(char *argv[])
 	return (NO_ERROR);
 }
 
-int	check_args(int argc, char *argv[], t_frame *frame)
+t_error	check_args(int argc, char *argv[], t_frame *frame)
 {
 	char	*tmp;
 
@@ -92,7 +95,7 @@ int	check_args(int argc, char *argv[], t_frame *frame)
 	if (argc == 6)
 	{
 		free(tmp);
-		tmp = ft_itoa(frame->nb_time_eat);
+		tmp = ft_itoa(frame->nb_meals);
 		if (ft_strncmp(argv[5], tmp, 512))
 			return (free(tmp), ERROR);
 	}

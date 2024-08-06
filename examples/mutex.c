@@ -1,51 +1,76 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mutex.c                                            :+:      :+:    :+:   */
+/*   data_race.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 14:57:29 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/06 14:57:32 by apetitco         ###   ########.fr       */
+/*   Created: 2024/08/06 18:15:50 by apetitco          #+#    #+#             */
+/*   Updated: 2024/08/06 18:15:53 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
 #include <pthread.h>
-#include <stdlib.h>
-#define BIG 1000000000UL
+#include <stdio.h>
+#include <unistd.h>
 
-struct s_utils
+struct s_test
 {
-	u_int32_t        *a;
-	pthread_mutex_t *a_lock;
+	int deposit;
+	pthread_mutex_t	*lock;
 };
 
-void *change_a(void *arg)
-{
-	struct s_utils *utils;
+int balance = 0;
 
-	utils = (struct s_utils *)arg;
-	pthread_mutex_lock(utils->a_lock);
-	for(u_int32_t i = 0; i < BIG; i++)
-		(*(utils->a))++;
-	pthread_mutex_unlock(utils->a_lock);
+void write_balance(int new_balance)
+{
+	usleep(250000);
+	balance = new_balance;
+}
+
+int read_balance()
+{
+	usleep(250000);
+	return (balance);
+}
+
+void	*deposit(struct s_test arg)
+{
+	pthread_mutex_lock(arg.lock);
+
+	int account_balance = read_balance();
+
+	account_balance += arg.deposit;
+
+	write_balance(account_balance);
+
+	pthread_mutex_unlock(arg.lock);
+
 	return (NULL);
 }
 
-int main()
+int	main()
 {
-	pthread_t       thread_1;
-	pthread_t       thread_2;
-	struct s_utils  utils;
-	u_int32_t        a;
-	pthread_mutex_t a_lock;
+	int before = read_balance();
+	printf("Before: %d\n", before);
 
-	pthread_mutex_init(&a_lock, NULL);
-	utils = (struct s_utils){&a, &a_lock};
-	pthread_create(&thread_1, NULL, change_a, &utils);
-	pthread_create(&thread_2, NULL, change_a, &utils);
-	pthread_join(thread_1, NULL);
-	pthread_join(thread_2, NULL);
-	printf("a is: %u\n", a);
+	pthread_t tid1;
+	pthread_t tid2;
+	pthread_mutex_t	lock;
+
+	struct s_test deposit1 = {300, &lock};
+	struct s_test deposit2 = {200, &lock};
+
+	pthread_mutex_init(&lock, NULL);
+	pthread_create(&tid1, NULL, (void*) deposit, &deposit1);
+	pthread_create(&tid2, NULL, (void*) deposit, &deposit2);
+
+	pthread_join(tid1, NULL);
+	pthread_join(tid2, NULL);
+	pthread_mutex_destroy(&lock);
+
+	int after = read_balance();
+	printf("After: %d\n", after);
+
+	return (0);
 }

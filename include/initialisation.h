@@ -16,14 +16,14 @@
 # include "philosophers.h"
 
 //-----MAIN FUNCTION-----//
-int	initialisation(int argc, char *argv[], t_frame *frame);
+t_error initialisation(int argc, char *argv[], t_frame *frame);
 
 //-----SUBSIDIARY FUNCTIONS-----//
-int	set_program_parameters(int argc, char *argv[], t_frame *frame);
-int	ft_init_table(t_frame *frame);
+t_error set_program_parameters(int argc, char *argv[], t_frame *frame);
+t_error ft_init_table(t_frame *frame);
 
 //-----UTILITIES-----//
-int	check_args(int argc, char *argv[], t_frame *frame);
-int	check_valid_args(char *argv[]);
+t_error check_args(int argc, char *argv[], t_frame *frame);
+t_error check_valid_args(char *argv[]);
 
 #endif

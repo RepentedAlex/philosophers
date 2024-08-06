@@ -26,7 +26,7 @@ t_philosopher	*new_node(int id)
 	return (node);
 }
 
-int	free_list(t_philosopher **head, long long nb_philo)
+t_error	free_list(t_philosopher **head, long long nb_philo)
 {
 	int				i;
 	t_philosopher	*nav;
@@ -48,7 +48,7 @@ int	free_list(t_philosopher **head, long long nb_philo)
 	return (NO_ERROR);
 }
 
-int	add_to_list(t_philosopher **head, int id)
+t_error	add_to_list(t_philosopher **head, int id)
 {
 	t_philosopher	*node;
 

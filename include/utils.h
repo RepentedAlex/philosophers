@@ -15,7 +15,7 @@
 
 # include "philosophers.h"
 
-int		free_list(t_philosopher **head, long long nb_philo);
+t_error free_list(t_philosopher **head, long long nb_philo);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 char	*ft_itoa(int n);
 void	*ft_calloc(size_t nmemb, size_t size);

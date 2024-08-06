@@ -14,7 +14,7 @@
 #include "termination.h"
 #include "utils.h"
 
-int	termination(t_frame *frame)
+t_error	termination(t_frame *frame)
 {
 	printf("\nStarting termination sequence.\n");
 	free_list(&frame->head, frame->nb_of_philo);

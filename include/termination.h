@@ -16,7 +16,7 @@
 # include "philosophers.h"
 
 //-----MAIN FUNCTION-----//
-int	termination(t_frame *frame);
+t_error termination(t_frame *frame);
 
 //-----SUBSIDIARY FUNCTIONS-----//
 

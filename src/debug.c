@@ -44,7 +44,7 @@ void	dump_frame(t_frame *frame)
 	printf("Time to die (in ms): [%ld]\n", frame->time_to_die);
 	printf("Time to eat (in ms): [%ld]\n", frame->time_to_eat);
 	printf("Time to sleep (in ms): [%ld]\n", frame->time_to_sleep);
-	printf("Eat limit: [%d]\n", frame->nb_time_eat);
+	printf("Eat limit: [%d]\n", frame->nb_meals);
 	if (frame->head)
 		(printf("\nNow reviewing list:\n"), review_list(&frame->head));
 	else

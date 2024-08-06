@@ -5,34 +5,59 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/06 14:54:26 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/06 14:54:30 by apetitco         ###   ########.fr       */
+/*   Created: 2024/08/06 18:15:50 by apetitco          #+#    #+#             */
+/*   Updated: 2024/08/06 18:15:53 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
 #include <pthread.h>
-#include <stdlib.h>
-#define BIG 1000000000UL
+#include <stdio.h>
+#include <unistd.h>
 
-void *change_a(void *arg)
+int balance = 0;
+
+int write_balance(int new_balance)
 {
-	u_int32_t *a = (u_int32_t *)arg;
-	for(u_int32_t i = 0; i < BIG; i++)
-		(*a)++;
+	usleep(250000);
+	balance = new_balance;
+}
+
+int read_balance()
+{
+	usleep(250000);
+	return (balance);
+}
+
+void	*deposit(void *amount)
+{
+	int account_balance = read_balance();
+
+	account_balance += *((int *)amount);
+
+	write_balance(account_balance);
+
 	return (NULL);
 }
 
-int main()
+int	main()
 {
-	pthread_t thread_1;
-	pthread_t thread_2;
-	u_int32_t a;
+	int before = read_balance();
+	printf("Before: %d\n", balance);
 
-	a = 0;
-	pthread_create(&thread_1, NULL, change_a, &a);
-	pthread_create(&thread_2, NULL, change_a, &a);
-	pthread_join(thread_1, NULL);
-	pthread_join(thread_2, NULL);
-	printf("a is: %u\n", a);
+	pthread_t tid1;
+	pthread_t tid2;
+
+	int deposit1 = 300;
+	int deposit2 = 200;
+
+	pthread_create(&tid1, NULL, deposit, (void*) &deposit1);
+	pthread_create(&tid2, NULL, deposit, (void*) &deposit2);
+
+	pthread_join(tid1, NULL);
+	pthread_join(tid2, NULL);
+
+	int after = read_balance();
+	printf("After: %d\n", after);
+
+	return (0);
 }
