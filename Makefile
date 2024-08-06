@@ -8,7 +8,7 @@ IFLAGS		=	-Iinclude
 LFLAGS		=
 WFLAGS		=	-Wall -Wextra -Werror -g3
 CFLAGS		=	$(WFLAGS) $(IFLAGS)
-CFLAGS		+=	$(FFLAGS)
+#CFLAGS		+=	$(FFLAGS)
 CFLAGS		+=	-MMD -MP
 
 #################
@@ -24,7 +24,11 @@ BLD_DIR	=	build/
 
 NAME		=	philo
 SRC_FILES	=	philosophers \
-				utils
+				debug \
+				initialisation \
+				list_utils \
+				utils \
+				utils_2
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_FILES)))
 OBJ			=	$(addprefix $(BLD_DIR), $(addsuffix .o, $(SRC_FILES)))
 

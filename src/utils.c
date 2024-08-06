@@ -12,10 +12,10 @@
 
 #include "philosophers.h"
 
-long long ft_atoll(const char *num)
+int ft_atoi(const char *num)
 {
-	long long i;
-	long long ret;
+	int i;
+	int ret;
 	int sign;
 
 	i = 0;
@@ -34,79 +34,62 @@ long long ft_atoll(const char *num)
 	return (ret * sign);
 }
 
-t_philosopher	*new_node(int id)
+void	ft_bzero(void *s, size_t n)
 {
-	t_philosopher	*node;
+	size_t			i;
+	unsigned char	*p;
 
-	node = malloc(sizeof(t_philosopher));
-	if (!node)
-		return (NULL);
-	memset(node, 0, sizeof(t_philosopher));
-	node->id = id;
-	node->prev = NULL;
-	node->next = NULL;
-	return (node);
-}
-
-int free_list(t_philosopher **head, long long nb_philo)
-{
-	int				i;
-	t_philosopher	*nav;
-	t_philosopher	*tmp;
-
+	p = s;
 	i = 0;
-	if (!head)
-		return (ERROR);
-	nav = *head;
-	while (i < nb_philo)
+	while (i < n)
 	{
-		tmp = nav->next;
-		memset(nav, 0, sizeof(t_philosopher));
-		free(nav);
-		nav = tmp;
+		p[i] = '\0';
 		i++;
 	}
-	return (NO_ERROR);
 }
 
-int	add_to_list(t_philosopher **head, int id)
+void	*ft_calloc(size_t nmemb, size_t size)
 {
-	t_philosopher	*node;
+	void	*pointer;
 
-	node = new_node(id);
-	if (!node)
-		return (ERROR);
-	if (*head == NULL)
-	{
-		*head = node;
-		(*head)->prev = *head;
-		(*head)->next = *head;
-	}
+	if (size == 0 || nmemb == 0)
+		return (malloc(0));
+	if (size > __SIZE_MAX__ / nmemb)
+		return (NULL);
+	pointer = NULL;
+	pointer = malloc(nmemb * size);
+	if (!pointer)
+		return (NULL);
+	ft_bzero(pointer, nmemb * size);
+	return (pointer);
+}
+
+int	ft_isdigit(int c)
+{
+	if ((c >= 48 && c <= 57) || c == '-' || c == '+')
+		return (c);
 	else
-	{
-		node->prev = (*head)->prev;
-		node->next = *head;
-		(*head)->prev->next = node;
-		(*head)->prev = node;
-	}
-	return (NO_ERROR);
+		return (0);
 }
 
-int	ft_init_table(int argc, char *argv[], t_frame *frame)
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
 {
-	int	i;
+	size_t	i;
+	int		result;
 
-	i = 1;
-	memset(frame, 0, sizeof(t_frame));
-	frame->head = NULL;
-	frame->nb_of_philo = ft_atoll(argv[1]);
-	if (argc == 6)
-		frame->nb_time_eat = ft_atoll(argv[5]);
-	while (i <= frame->nb_of_philo)
+	if (n == 0 || !s1 || !s2)
+		return (0);
+	i = 0;
+	if (s1[i + 1] && s1[i] == '+')
+		s1++;
+	while (i < n && (s1[i] || s2[i]))
 	{
-		if (add_to_list(&frame->head, i))
-			return (free_list(&frame->head, frame->nb_of_philo), ERROR);
+		if (((unsigned char *)s1)[i] != ((unsigned char *)s2)[i])
+		{
+			result = ((unsigned char *)s1)[i] - ((unsigned char *)s2)[i];
+			return (result);
+		}
 		i++;
 	}
-	return (NO_ERROR);
+	return (0);
 }

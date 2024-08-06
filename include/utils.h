@@ -1,26 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philosophers.c                                     :+:      :+:    :+:   */
+/*   utils.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/11 12:23:01 by apetitco          #+#    #+#             */
-/*   Updated: 2024/06/11 13:20:26 by apetitco         ###   ########.fr       */
+/*   Created: 2024/08/06 12:32:00 by apetitco          #+#    #+#             */
+/*   Updated: 2024/08/06 12:32:43 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef PHILOSOPHERS_UTILS_H
+#define PHILOSOPHERS_UTILS_H
+
 #include "philosophers.h"
-#include "initialisation.h"
-#include "debug.h"
 
-int	main(int argc, char *argv[])
-{
-	t_frame	frame;
+int		ft_strncmp(const char *s1, const char *s2, size_t n);
+char	*ft_itoa(int n);
+void	*ft_calloc(size_t nmemb, size_t size);
+void	ft_bzero(void *s, size_t n);
+int		ft_isdigit(int c);
 
-	if (initialisation(argc, argv, &frame))
-		return (printf("An error has occurred at startup.\n"), 1);
-	dump_frame(&frame);
-	free_list(&frame.head, frame.nb_of_philo);
-	dump_frame(&frame);
-}
+#endif //PHILOSOPHERS_UTILS_H

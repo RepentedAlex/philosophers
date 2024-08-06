@@ -42,18 +42,17 @@ typedef struct s_philosopher
 
 typedef struct	s_frame
 {
-	long long		nb_of_philo;
+	int				nb_of_philo;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
-	long long		nb_time_eat;
+	int				nb_time_eat;
 	t_philosopher	*head;
 }				t_frame;
 
 int				add_to_list(t_philosopher **head, int id);
-long long		ft_atoll(const char *num);
+int ft_atoi(const char *num);
 int				free_list(t_philosopher **head, long long nb_philo);
-int				ft_init_table(int argc, char *argv[], t_frame *frame);
 t_philosopher	*new_node(int id);
 
 #endif
