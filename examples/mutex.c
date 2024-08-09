@@ -10,67 +10,65 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
 
-struct s_test
-{
-	int deposit;
-	pthread_mutex_t	*lock;
-};
+pthread_mutex_t	mutex_fuel;
+pthread_cond_t	cond_fuel;
+int 			fuel = 0;
 
-int balance = 0;
-
-void write_balance(int new_balance)
+void	*fuel_filling(void *arg)
 {
-	usleep(250000);
-	balance = new_balance;
+	for (int i = 0; i < 5 ; i++)
+	{
+		pthread_mutex_lock(&mutex_fuel);
+		fuel += 30;
+		printf("Filled fuel... %d\n", fuel);
+		pthread_mutex_unlock(&mutex_fuel);
+		pthread_cond_broadcast(&cond_fuel);
+		sleep(1);
+	}
 }
 
-int read_balance()
+void	*car(void *arg)
 {
-	usleep(250000);
-	return (balance);
+	pthread_mutex_lock(&mutex_fuel);
+	while (fuel < 40)
+	{
+		printf("No fuel. Waiting...\n");
+		pthread_cond_wait(&cond_fuel, &mutex_fuel);
+	}
+	fuel -= 40;
+	printf("Got fuel. Now left: %d\n", fuel);
+	pthread_mutex_unlock(&mutex_fuel);
 }
 
-void	*deposit(struct s_test arg)
+int main()
 {
-	pthread_mutex_lock(arg.lock);
+	pthread_t	t_id[2];
 
-	int account_balance = read_balance();
-
-	account_balance += arg.deposit;
-
-	write_balance(account_balance);
-
-	pthread_mutex_unlock(arg.lock);
-
-	return (NULL);
-}
-
-int	main()
-{
-	int before = read_balance();
-	printf("Before: %d\n", before);
-
-	pthread_t tid1;
-	pthread_t tid2;
-	pthread_mutex_t	lock;
-
-	struct s_test deposit1 = {300, &lock};
-	struct s_test deposit2 = {200, &lock};
-
-	pthread_mutex_init(&lock, NULL);
-	pthread_create(&tid1, NULL, (void*) deposit, &deposit1);
-	pthread_create(&tid2, NULL, (void*) deposit, &deposit2);
-
-	pthread_join(tid1, NULL);
-	pthread_join(tid2, NULL);
-	pthread_mutex_destroy(&lock);
-
-	int after = read_balance();
-	printf("After: %d\n", after);
-
+	pthread_mutex_init(&mutex_fuel, NULL);
+	pthread_cond_init(&cond_fuel, NULL);
+	for (int i = 0; i < 6; i++)
+	{
+		if (i == 4 || i == 5)
+		{
+			if (pthread_create(&t_id[i], NULL, &fuel_filling, NULL))
+				perror("Failed to create thread.\n");
+		}
+		else if (pthread_create(&t_id[i], NULL, &car, NULL))
+		{
+			perror("Failed to create thread.\n");
+		}
+	}
+	for (int i = 0; i < 6; i++)
+	{
+		if (pthread_join(t_id[i], NULL))
+			perror("Failed to joind thread.\n");
+	}
+	pthread_mutex_destroy(&mutex_fuel);
+	pthread_cond_destroy(&cond_fuel);
 	return (0);
 }
