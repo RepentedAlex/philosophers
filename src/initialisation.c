@@ -11,93 +11,103 @@
 /* ************************************************************************** */
 
 #include "philosophers.h"
-#include "initialisation.h"
 #include "utils.h"
 
-//RAJOUTER START TIME
-t_error	initialisation(int argc, char *argv[], t_frame *frame)
+/// \brief Initialises all the data for the ruleset.
+/// \param argv CLI arguments.
+/// \param ruleset Pointer to the structure holding all the simulation's params.
+/// \return ERROR if it encountered an error, NO_ERROR otherwise.
+t_error	ft_init_data(char **argv, t_ruleset *ruleset)
 {
-	memset(frame, 0, sizeof(*frame));
-	printf("Setting program's parameters...\n");
-	if (argc != 5 && argc != 6)
-		return (printf("Error: Invalid number of arguments.\n"), ERROR);
-	if (set_program_parameters(argc, argv, frame))
-		return (printf("Error: Invalid arguments.\n"), ERROR);
-	if (ft_init_table(frame))
-		return (printf("Error: Couldn't initialise table.\n"), ERROR);
-	return (printf("Program initialised.\n"), NO_ERROR);
-}
-
-t_error	set_program_parameters(int argc, char *argv[], t_frame *frame)
-{
-	if (check_valid_args(argv))
-		return (ERROR);
-	frame->nb_of_philo = ft_atoi(argv[1]);
-	if (frame->nb_of_philo < MIN_PHILO || frame->nb_of_philo > MAX_PHILO)
-		return (printf("Error: Please provide [0-200] philo.\n"), ERROR);
-	frame->time_to_die = (time_t)ft_atoi(argv[2]);
-	frame->time_to_eat = (time_t)ft_atoi(argv[3]);
-	frame->time_to_sleep = (time_t)ft_atoi(argv[4]);
-	if (argc == 6)
-		frame->nb_meals = ft_atoi(argv[5]);
-	if (check_args(argc, argv, frame))
-		return (ERROR);
+	ruleset->nb_philos = ft_atoi(argv[1]);
+	ruleset->death_time = ft_atoi(argv[2]);
+	ruleset->eat_time = ft_atoi(argv[3]);
+	ruleset->sleep_time = ft_atoi(argv[4]);
+	if (argv[5])
+		ruleset->max_meals = ft_atoi(argv[5]);
+	else
+		ruleset->max_meals = -1;
+	if (ruleset->nb_philos < MIN_PHILOS || ruleset->nb_philos > MAX_PHILOS ||
+	ruleset->death_time < 0 || ruleset->eat_time < 0 || ruleset->sleep_time < 0)
+		return (ft_error("Error: Invalid arguments.\n", ruleset), ERROR);
+	ruleset->dead = 0;
+	pthread_mutex_init(&ruleset->write, NULL);
+	pthread_mutex_init(&ruleset->lock, NULL);
 	return (NO_ERROR);
 }
 
-t_error	ft_init_table(t_frame *frame)
+/// \brief Allocates memory for the three arrays (thread IDs, forks, philos).
+/// \param ruleset Pointer to the structure holding all the simulation's params.
+/// \return ERROR if it encountered an error, NO_ERROR otherwise.
+t_error ft_alloc(t_ruleset *ruleset)
 {
-	int	i;
+	ruleset->tid = malloc(ruleset->nb_philos * sizeof(pthread_t));
+	if (!ruleset->tid)
+		return (ft_error("Error: Couldn't allocate memory.", ruleset), ERROR);
+	ruleset->forks = malloc(ruleset->nb_philos * sizeof(pthread_mutex_t));
+	if (!ruleset->forks)
+		return (ft_error("Error: Couldn't allocate memory.", ruleset), ERROR);
+	ruleset->philos = malloc(ruleset->nb_philos * sizeof(t_philo));
+	if (!ruleset->philos)
+		return (ft_error("Error: Couldn't allocate memory.", ruleset), ERROR);
+	return (NO_ERROR);
+}
 
+/// \brief Initialises every fork's mutex and assign each fork to a philosopher.
+/// \param ruleset Pointer to the structure holding all the simulation's params.
+/// \return ERROR if it encountered an error, NO_ERROR otherwise.
+t_error	ft_init_forks(t_ruleset *ruleset)
+{
+	int i = -1;
+
+	while (++i < ruleset->nb_philos)
+		if (pthread_mutex_init(&ruleset->forks[i], NULL))
+			return (ft_error("Error: Couldn't initialise mutex.\n", ruleset), ERROR);
 	i = 0;
-	while (++i <= frame->nb_of_philo)
-		if (add_to_list(&frame->head, i))
-			return (free_list(&frame->head, frame->nb_of_philo), ERROR);
-	return (NO_ERROR);
-}
-
-t_error	check_valid_args(char *argv[])
-{
-	int	i;
-	int	j;
-
-	i = 1;
-	while (argv[i])
+	ruleset->philos[i].l_fork = &ruleset->forks[0];
+	ruleset->philos[i].r_fork = &ruleset->forks[ruleset->nb_philos - 1];
+	while (++i < ruleset->nb_philos)
 	{
-		j = -1;
-		while (argv[i][++j])
-			if (!ft_isdigit(argv[i][j]))
-				return (ERROR);
-		i++;
+		ruleset->philos[i].l_fork = &ruleset->forks[i];
+		ruleset->philos[i].r_fork = &ruleset->forks[i - 1];
 	}
 	return (NO_ERROR);
 }
 
-t_error	check_args(int argc, char *argv[], t_frame *frame)
+/// \brief
+/// \param ruleset Pointer to the structure holding all the simulation's params.
+/// \return ERROR if it encountered an error, NO_ERROR otherwise.
+t_error ft_init_philos(t_ruleset *ruleset)
 {
-	char	*tmp;
+	int i;
 
-	tmp = ft_itoa(frame->nb_of_philo);
-	if (ft_strncmp(argv[1], tmp, 512))
-		return (free(tmp), ERROR);
-	free(tmp);
-	tmp = ft_itoa(frame->time_to_die);
-	if (ft_strncmp(argv[2], tmp, 512))
-		return (free(tmp), ERROR);
-	free(tmp);
-	tmp = ft_itoa(frame->time_to_eat);
-	if (ft_strncmp(argv[3], tmp, 512))
-		return (free(tmp), ERROR);
-	free(tmp);
-	tmp = ft_itoa(frame->time_to_sleep);
-	if (ft_strncmp(argv[4], tmp, 512))
-		return (free(tmp), ERROR);
-	if (argc == 6)
+	i = -1;
+	while (++i < ruleset->nb_philos)
 	{
-		free(tmp);
-		tmp = ft_itoa(frame->nb_meals);
-		if (ft_strncmp(argv[5], tmp, 512))
-			return (free(tmp), ERROR);
+		ruleset->philos[i].ruleset = ruleset;
+		ruleset->philos[i].id = i + 1;
+		ruleset->philos[i].time_to_die = ruleset->death_time;
+		ruleset->philos[i].meals_eaten = 0;
+		ruleset->philos[i].status = 0;
+		if (pthread_mutex_init(&ruleset->philos[i].lock, NULL))
+			return (ft_error("Error: Couldn't initialise mutex.\n", ruleset), ERROR);
 	}
-	return (free(tmp), NO_ERROR);
+	return (NO_ERROR);
+}
+
+/// \brief Handles all the initialisation.
+/// \param argv CLI arguments.
+/// \param ruleset Pointer to the structure holding all the simulation's params.
+/// \return ERROR if it encountered an error, NO_ERROR otherwise.
+t_error ft_init(char **argv, t_ruleset *ruleset)
+{
+	if (ft_init_data(argv, ruleset))
+		return (ERROR);
+	if (ft_alloc(ruleset))
+		return (ERROR);
+	if (ft_init_forks(ruleset))
+		return (ERROR);
+	if (ft_init_philos(ruleset))
+		return (ERROR);
+	return (NO_ERROR);
 }

@@ -14,61 +14,65 @@
 # define PHILOSOPHERS_H
 
 # include <pthread.h>
-# include <stdbool.h>
+#include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <string.h>
 # include <unistd.h>
 # include <sys/time.h>
 
-# define MIN_PHILO 1
-# define MAX_PHILO 200
+# define MIN_PHILOS 1
+# define MAX_PHILOS 200
+
+typedef bool	t_error;
 
 # define ERROR 1
 # define NO_ERROR 0
 
-typedef bool	t_error;
+struct	s_philo;
 
-typedef enum e_states
+typedef struct	s_ruleset
 {
-	eating,
-	thinking,
-	sleeping
-}				t_states;
-
-typedef struct s_philosopher
-{
-	int						id;
-	int						thread_id;
-	int						state;
-	time_t					last_meal;
-	int						nb_dinner;
-	int						is_replete;
-	struct s_philosopher	*prev;
-	struct s_philosopher	*next;
-	pthread_mutex_t			lock;
-	pthread_mutex_t			*fork;
-}				t_philosopher;
-
-typedef struct s_frame
-{
-	int 			*thread_id;
-	int				nb_of_philo;
-	time_t			time_to_die;
-	time_t			time_to_eat;
-	time_t			time_to_sleep;
-	time_t			start_time;
-	int				nb_meals;
-	int				nb_philo_replete;
-	int				stop;
-	t_philosopher	*head;
+	pthread_t		*tid;
+	int 			nb_philos;
+	int 			max_meals;
+	int 			dead;
+	struct s_philo	*philos;
+	time_t			death_time;
+	time_t 			eat_time;
+	time_t			sleep_time;
+	time_t 			start_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	lock;
 	pthread_mutex_t	write;
-}				t_frame;
+}				t_ruleset;
 
-t_error add_to_list(t_philosopher **head, int id);
-int				ft_atoi(const char *num);
-t_philosopher	*new_node(int id);
+typedef struct	s_philo
+{
+	t_ruleset		*ruleset;
+	pthread_t		tid;
+	int 			id;
+	int 			meals_eaten;
+	int 			status;	// -1 dead ; 0 sleeping ; 1 thinking ; 2 sleeping
+	time_t			time_to_die;
+	pthread_mutex_t	lock;
+	pthread_mutex_t	*l_fork;
+	pthread_mutex_t	*r_fork;
+}				t_philo;
+
+//----- INITIALISATION -----//
+t_error ft_init(char **argv, t_ruleset *ruleset);
+t_error	ft_init_data(char **argv, t_ruleset *ruleset);
+t_error	ft_init_forks(t_ruleset *ruleset);
+
+//----- CHECKERS -----//
+t_error check_valid_args(char *argv[], t_ruleset *ruleset);
+
+//----- ERROR HANDLING -----//
+void	clear_ruleset(t_ruleset *ruleset);
+int		ft_error(char *str, t_ruleset *ruleset);
+void	ft_exit(t_ruleset *ruleset);
+
+//----- UTILITIES -----//
+int	ft_atoi(const char *num);
 
 #endif

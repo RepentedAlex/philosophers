@@ -24,10 +24,7 @@ BLD_DIR	=	build/
 
 NAME		=	philo
 SRC_FILES	=	philosophers \
-				debug \
 				initialisation \
-				list_utils \
-				termination \
 				utils \
 				utils_2
 SRC			=	$(addprefix $(SRC_DIR), $(addsuffix .c, $(SRC_FILES)))

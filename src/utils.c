@@ -93,3 +93,20 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 	}
 	return (0);
 }
+
+t_error check_valid_args(char *argv[], t_ruleset *ruleset)
+{
+	int	i;
+	int	j;
+
+	i = 1;
+	while (argv[i])
+	{
+		j = -1;
+		while (argv[i][++j])
+			if (!ft_isdigit(argv[i][j]))
+				return (ft_error("Error invalid arguments.\n", ruleset), ERROR);
+		i++;
+	}
+	return (NO_ERROR);
+}
