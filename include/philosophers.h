@@ -1,0 +1,8 @@
+//
+// Created by apetitco on 8/13/24.
+//
+
+#ifndef PHILOSOPHERS_PHILOSOPHERS_H
+#define PHILOSOPHERS_PHILOSOPHERS_H
+
+#endif //PHILOSOPHERS_PHILOSOPHERS_H
