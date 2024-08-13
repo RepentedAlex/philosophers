@@ -12,11 +12,47 @@
 
 #include "philosophers.h"
 
+/// \brief Converts a string-exprimed number into an int.
+/// \param str The number exprimed in an array of character.
+/// \return The number in an integer.
+int	ft_atoi(const char *str)
+{
+	int	i;
+	int	ret;
+
+	i = 0;
+	ret = 0;
+	while (str[i] == 9 || str[i] == 32)
+		i++;
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		ret = ret * 10 + (str[i] - '0');
+		i++;
+	}
+	return (ret);
+}
+
+/// \brief Fills the corresponding structures with the CLI-provided arguments.
+/// \param argv CLI arguments.
+/// \return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
+t_error parsing(int argc, t_ruleset *ruleset, char *argv[])
+{
+	if (argc != 5 && argc != 6)
+		return (ERROR);
+	ruleset->number_of_philosophers = ft_atoi(argv[1]);
+	ruleset->time_to_die = ft_atoi(argv[2]);
+	ruleset->time_to_eat = ft_atoi(argv[3]);
+	ruleset->time_to_sleep = ft_atoi(argv[4]);
+	if (argc == 6)
+		ruleset->max_meals = ft_atoi(argv[5]);
+	return (NO_ERROR);
+}
+
 /// \brief Checks for invalid characters in the passed arguments.
 /// \param argc Number of CLI arguments.
 /// \param argv CLI arguments.
 /// \return ERROR(1) if a non-digit character is encountered, else NO_ERROR(O).
-t_error	check_input(int argc, char *argv[])
+t_error	check_input(char *argv[])
 {
 	int	i;
 	int	j;
@@ -31,13 +67,18 @@ t_error	check_input(int argc, char *argv[])
 				return (ERROR);
 			j++;
 		}
+		i++;
 	}
 	return (NO_ERROR);
 }
 
 int	main(int argc, char *argv[])
 {
-	if (check_input(argc, argv))
+	t_ruleset	ruleset;
+
+	if (check_input(argv))
+		return (ERROR);
+	if (parsing(argc, &ruleset, argv))
 		return (ERROR);
 	return (NO_ERROR);
 }
