@@ -37,6 +37,7 @@ int	ft_atoi(const char *str)
 /// \return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
 t_error parsing(int argc, t_ruleset *ruleset, char *argv[])
 {
+	memset(ruleset, 0, sizeof(t_ruleset));
 	if (argc != 5 && argc != 6)
 		return (ERROR);
 	ruleset->number_of_philosophers = ft_atoi(argv[1]);
@@ -45,6 +46,9 @@ t_error parsing(int argc, t_ruleset *ruleset, char *argv[])
 	ruleset->time_to_sleep = ft_atoi(argv[4]);
 	if (argc == 6)
 		ruleset->max_meals = ft_atoi(argv[5]);
+	else
+		ruleset->max_meals = -1;
+	pthread_mutex_init(ruleset->write, NULL);
 	return (NO_ERROR);
 }
 
@@ -80,5 +84,10 @@ int	main(int argc, char *argv[])
 		return (ERROR);
 	if (parsing(argc, &ruleset, argv))
 		return (ERROR);
+	ruleset.philos = malloc(ruleset.number_of_philosophers * sizeof(t_philo));
+	if (!ruleset.philos)
+		//TODO EXIT
+	pthread_mutex_init(ruleset.write, NULL);
+
 	return (NO_ERROR);
 }
