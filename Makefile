@@ -45,6 +45,7 @@ TES_DIR	=	tests/
 #############
 
 SRC_FILES	=	philosophers \
+				routine \
 				utils
 
 ########################

@@ -12,10 +12,7 @@
 
 #include "philosophers.h"
 
-void	routine(t_ruleset *ruleset)
-{
-	(void)ruleset;
-}
+
 
 /// \brief
 /// \param ruleset A pointer to the ruleset structure.
@@ -39,26 +36,25 @@ t_error	init_philos(t_ruleset *ruleset)
 		ruleset->philos_array[i].ruleset = ruleset;
 		ruleset->philos_array[i].id = i + 1;
 		pthread_create(&ruleset->philos_array[i].tid, NULL, (void *)&routine,
-					   (void *)ruleset);
+					   (void *)&ruleset->philos_array[i]);
 		if (!ruleset->philos_array[i].tid)
 			return (ft_exit(ruleset), ERROR);
 		ruleset->philos_array[i].last_meal = 0;
 		ruleset->philos_array[i].status = 0;
 		ruleset->philos_array[i].nb_of_meals = 0;
 		pthread_mutex_init(&ruleset->philos_array[i].l_fork, NULL);
-//		if (!ruleset->philos_array[i].l_fork)
-//			return (ft_exit(ruleset), ERROR);
-		ruleset->philos_array[i].neighbor = malloc(sizeof(t_philo) * 2);
 		if (i == 0)
 			ruleset->philos_array[i].neighbor[0] =
-					ruleset->philos_array[ruleset->number_of_philosophers -
+					&ruleset->philos_array[ruleset->number_of_philosophers -
 											1];
 		else
-			ruleset->philos_array[i].neighbor[0] = ruleset->philos_array[i - 1];
+			ruleset->philos_array[i].neighbor[0] = &ruleset->philos_array[i -
+																		  1];
 		if (i == ruleset->number_of_philosophers - 1)
-			ruleset->philos_array[i].neighbor[1] = ruleset->philos_array[0];
+			ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[0];
 		else
-			ruleset->philos_array[i].neighbor[1] = ruleset->philos_array[i + 1];
+			ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[i +
+																		  1];
 		i++;
 	}
 	return (NO_ERROR);
@@ -112,20 +108,24 @@ t_error	check_input(char *argv[])
 
 int	main(int argc, char *argv[])
 {
-	t_ruleset	ruleset;
+	t_ruleset	*ruleset;
 
+	ruleset = malloc(sizeof(t_ruleset));
+	if (!ruleset)
+		return (ERROR);
 	if (check_input(argv))
 		return (ERROR);
-	if (parsing(argc, &ruleset, argv))
+	if (parsing(argc, ruleset, argv))
 		return (ERROR);
-	ruleset.philos_array = malloc(ruleset.number_of_philosophers * sizeof(t_philo));
-	if (!ruleset.philos_array)
-		return (ft_exit(&ruleset), ERROR);
-	if (init_philos(&ruleset))
+	ruleset->philos_array = malloc(ruleset->number_of_philosophers * sizeof
+			(t_philo));
+//	if (!ruleset->philos_array)
+//		return (ft_exit(ruleset), ERROR);
+	if (init_philos(ruleset))
 		return (ERROR);
-	if (init_simu(&ruleset))
+	if (init_simu(ruleset))
 		return (ERROR);
-	join_all_threads(&ruleset);
-	ft_exit(&ruleset);
+	join_all_threads(ruleset);
+	ft_exit(ruleset);
 	return (NO_ERROR);
 }

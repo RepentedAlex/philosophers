@@ -34,21 +34,9 @@ int	ft_atoi(const char *str)
 
 void	ft_exit(t_ruleset *ruleset)
 {
-	int i;
-
-	i = 0;
-	if (ruleset->philos_array)
-	{
-		while (i < ruleset->number_of_philosophers)
-		{
-			if (ruleset->philos_array[i].neighbor)
-				free(ruleset->philos_array[i].neighbor);
-//			if (ruleset->philos_array[i].l_fork)
-//				pthread_mutex_destroy(ruleset->philos_array[i].l_fork);
-			i++;
-		}
-		free(ruleset->philos_array);
-	}
+	if (!ruleset)
+		return;
+	free(ruleset->philos_array);
 }
 
 void	join_all_threads(t_ruleset *ruleset)
@@ -61,4 +49,29 @@ void	join_all_threads(t_ruleset *ruleset)
 		pthread_join(ruleset->philos_array[i].tid, NULL);
 		i++;
 	}
+}
+
+time_t	get_time(void)
+{
+	struct timeval	timeval;
+
+	if (gettimeofday(&timeval, NULL))
+		return (ft_error("gettimeofday() failed.\n", NULL), (time_t)NULL);
+	return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
+}
+
+void	ft_error(char *str, t_ruleset *ruleset)
+{
+	printf("%s\n", str);
+	ft_exit(ruleset);
+}
+
+int	ft_usleep(u_int64_t	time)
+{
+	u_int64_t	start;
+
+	start = get_time();
+	while ((get_time() - start) < time)
+		usleep(time / 10);
+	return (0);
 }
