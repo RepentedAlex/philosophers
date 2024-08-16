@@ -28,12 +28,20 @@ typedef bool t_error;
 #define ERROR 1
 #define NO_ERROR 0
 
+typedef enum	e_states
+{
+	dead = -1,
+	sleeping = 0,
+	thinking = 1,
+	eating = 2
+}				t_states;
+
 struct	s_philo;
 
 typedef struct	s_ruleset
 {
-	struct s_philo	*philos;
 	int				number_of_philosophers;
+	struct s_philo	*philos_array;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
@@ -41,7 +49,6 @@ typedef struct	s_ruleset
 	time_t			start_time;
 	int				nb_replete_philos;
 	int				stop;
-	pthread_mutex_t	*write;
 }				t_ruleset;
 
 typedef struct	s_philo
@@ -50,16 +57,21 @@ typedef struct	s_philo
 	int				id;
 	pthread_t		tid;
 	time_t			last_meal;
-	int				status;
+	t_states 		status;
 	int				nb_of_meals;
-	int				state;
-	pthread_mutex_t	lock;
-	pthread_mutex_t	*l_fork;
-	pthread_mutex_t	*r_fork;
+	pthread_mutex_t	l_fork;
+	struct	s_philo	*neighbor;
 }				t_philo;
 
 //----- INITIALISATION -----//
 t_error	check_input(char *argv[]);
+t_error	init_philos(t_ruleset *ruleset);
+t_error	init_simu(t_ruleset *ruleset);
 t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
+
+//----- UTILS -----//
+int		ft_atoi(const char *str);
+void	ft_exit(t_ruleset *ruleset);
+void	join_all_threads(t_ruleset *ruleset);
 
 #endif

@@ -24,6 +24,7 @@ FFLAGS	=	-fsanitize=address
 IFLAGS	=	-Iinclude/
 DEBUG	=	-g3
 FLAGS	=	$(CFLAGS) $(DFLAGS) $(IFLAGS)
+#FLAGS	+=	$(FFLAGS)
 FLAGS	+=	$(DEBUG)
 
 #################
@@ -43,7 +44,8 @@ TES_DIR	=	tests/
 ## SOURCES ##
 #############
 
-SRC_FILES	=	philosophers
+SRC_FILES	=	philosophers \
+				utils
 
 ########################
 ## INTERMEDIARY FILES ##

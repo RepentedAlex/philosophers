@@ -12,24 +12,56 @@
 
 #include "philosophers.h"
 
-/// \brief Converts a string-exprimed number into an int.
-/// \param str The number exprimed in an array of character.
-/// \return The number in an integer.
-int	ft_atoi(const char *str)
+void	routine(t_ruleset *ruleset)
 {
-	int	i;
-	int	ret;
+	(void)ruleset;
+}
+
+/// \brief
+/// \param ruleset A pointer to the ruleset structure.
+/// \return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
+t_error	init_simu(t_ruleset *ruleset)
+{
+	(void)ruleset;
+	return (NO_ERROR);
+}
+
+/// \brief Initialises the array of philos.
+/// \param ruleset A pointer to the ruleset structure.
+/// \return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
+t_error	init_philos(t_ruleset *ruleset)
+{
+	int i;
 
 	i = 0;
-	ret = 0;
-	while (str[i] == 9 || str[i] == 32)
-		i++;
-	while (str[i] >= '0' && str[i] <= '9')
+	while (i < ruleset->number_of_philosophers)
 	{
-		ret = ret * 10 + (str[i] - '0');
+		ruleset->philos_array[i].ruleset = ruleset;
+		ruleset->philos_array[i].id = i + 1;
+		pthread_create(&ruleset->philos_array[i].tid, NULL, (void *)&routine,
+					   (void *)ruleset);
+		if (!ruleset->philos_array[i].tid)
+			return (ft_exit(ruleset), ERROR);
+		ruleset->philos_array[i].last_meal = 0;
+		ruleset->philos_array[i].status = 0;
+		ruleset->philos_array[i].nb_of_meals = 0;
+		pthread_mutex_init(&ruleset->philos_array[i].l_fork, NULL);
+//		if (!ruleset->philos_array[i].l_fork)
+//			return (ft_exit(ruleset), ERROR);
+		ruleset->philos_array[i].neighbor = malloc(sizeof(t_philo) * 2);
+		if (i == 0)
+			ruleset->philos_array[i].neighbor[0] =
+					ruleset->philos_array[ruleset->number_of_philosophers -
+											1];
+		else
+			ruleset->philos_array[i].neighbor[0] = ruleset->philos_array[i - 1];
+		if (i == ruleset->number_of_philosophers - 1)
+			ruleset->philos_array[i].neighbor[1] = ruleset->philos_array[0];
+		else
+			ruleset->philos_array[i].neighbor[1] = ruleset->philos_array[i + 1];
 		i++;
 	}
-	return (ret);
+	return (NO_ERROR);
 }
 
 /// \brief Fills the corresponding structures with the CLI-provided arguments.
@@ -48,7 +80,9 @@ t_error parsing(int argc, t_ruleset *ruleset, char *argv[])
 		ruleset->max_meals = ft_atoi(argv[5]);
 	else
 		ruleset->max_meals = -1;
-	pthread_mutex_init(ruleset->write, NULL);
+	if (ruleset->number_of_philosophers < MIN_PHILO ||
+	ruleset->number_of_philosophers > MAX_PHILO)
+		return (ERROR);
 	return (NO_ERROR);
 }
 
@@ -84,10 +118,14 @@ int	main(int argc, char *argv[])
 		return (ERROR);
 	if (parsing(argc, &ruleset, argv))
 		return (ERROR);
-	ruleset.philos = malloc(ruleset.number_of_philosophers * sizeof(t_philo));
-	if (!ruleset.philos)
-		//TODO EXIT
-	pthread_mutex_init(ruleset.write, NULL);
-
+	ruleset.philos_array = malloc(ruleset.number_of_philosophers * sizeof(t_philo));
+	if (!ruleset.philos_array)
+		return (ft_exit(&ruleset), ERROR);
+	if (init_philos(&ruleset))
+		return (ERROR);
+	if (init_simu(&ruleset))
+		return (ERROR);
+	join_all_threads(&ruleset);
+	ft_exit(&ruleset);
 	return (NO_ERROR);
 }
