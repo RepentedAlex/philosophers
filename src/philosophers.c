@@ -12,14 +12,50 @@
 
 #include "philosophers.h"
 
+void	supervisor(t_ruleset *ruleset)
+{
+	printf("Supervisor launched!\n");
+	while (ruleset->start_time && !ruleset->stop)
+	{
+		if (ruleset->nb_replete_philos == ruleset->number_of_philosophers)
+		{
+			printf("All philos are replete!\n");
+			ruleset->stop = 1;
 
+		}
+	}
+	printf("Supervisor exiting!\n");
+}
+
+t_error observator(t_philo *philo)
+{
+	printf("Philo [%d] observator launched!\n", philo->id);
+	while (!philo->ruleset->stop)
+	{
+		if (philo->status != eating && get_time() - philo->last_meal <= 0)
+		{
+			pthread_mutex_lock(&philo->philo_lock);
+			philo->status = dead;
+			philo->ruleset->stop = 1;
+			pthread_mutex_unlock(&philo->philo_lock);
+			printf("%ld : philo [%d] has died... :(\n", get_time(), philo->id);
+			return (ERROR);
+		}
+		if (philo->nb_of_meals >= philo->ruleset->max_meals)
+			philo->ruleset->nb_replete_philos++;
+	}
+	printf("Philo [%d] observator exiting!\n", philo->id);
+	return (NO_ERROR);
+}
 
 /// \brief
 /// \param ruleset A pointer to the ruleset structure.
 /// \return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
 t_error	init_simu(t_ruleset *ruleset)
 {
-	(void)ruleset;
+	ruleset->start_time = get_time();
+	if (!ruleset->start_time)
+		return (ft_exit(ruleset), ERROR);
 	return (NO_ERROR);
 }
 
@@ -39,10 +75,11 @@ t_error	init_philos(t_ruleset *ruleset)
 					   (void *)&ruleset->philos_array[i]);
 		if (!ruleset->philos_array[i].tid)
 			return (ft_exit(ruleset), ERROR);
+		pthread_mutex_init(&ruleset->philos_array[i].philo_lock, NULL);
+		pthread_mutex_lock(&ruleset->philos_array[i].philo_lock);
 		ruleset->philos_array[i].last_meal = 0;
-		ruleset->philos_array[i].status = 0;
+		ruleset->philos_array[i].status = thinking;
 		ruleset->philos_array[i].nb_of_meals = 0;
-		pthread_mutex_init(&ruleset->philos_array[i].l_fork, NULL);
 		if (i == 0)
 			ruleset->philos_array[i].neighbor[0] =
 					&ruleset->philos_array[ruleset->number_of_philosophers -
@@ -55,6 +92,9 @@ t_error	init_philos(t_ruleset *ruleset)
 		else
 			ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[i +
 																		  1];
+		pthread_mutex_unlock(&ruleset->philos_array[i].philo_lock);
+		pthread_create(&ruleset->philos_array[i].observator, NULL, (void *)
+		&observator, (void *)&ruleset->philos_array[i]);
 		i++;
 	}
 	return (NO_ERROR);
@@ -119,12 +159,11 @@ int	main(int argc, char *argv[])
 		return (ERROR);
 	ruleset->philos_array = malloc(ruleset->number_of_philosophers * sizeof
 			(t_philo));
-//	if (!ruleset->philos_array)
-//		return (ft_exit(ruleset), ERROR);
 	if (init_philos(ruleset))
 		return (ERROR);
 	if (init_simu(ruleset))
 		return (ERROR);
+	supervisor(ruleset);
 	join_all_threads(ruleset);
 	ft_exit(ruleset);
 	return (NO_ERROR);

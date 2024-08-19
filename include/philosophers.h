@@ -34,11 +34,24 @@ typedef enum	e_states
 	dead = -1,
 	sleeping = 0,
 	thinking = 1,
-	eating = 2
+	eating = 2,
+	replete = 3
 }				t_states;
 
 struct	s_philo;
 
+/*!
+ * @brief
+ * @var	number_of_philosophers The total number of philosophers.
+ * @var	*philos_array Pointer to the table of philosophers.
+ * @var	time_to_die Max time before a philo dies of starvation.
+ * @var	time_to_eat Duration of a meal.
+ * @var	time_to_sleep Duration of a nap.
+ * @var	max_meals Number of meals a philo must eat to be replete.
+ * @var	start_time Simulation start timestamp.
+ * @var	nb_replete_philos Counter for the number of philos that are replete.
+ * @var	stop Flag that signals the end of the simulation.
+ */
 typedef struct	s_ruleset
 {
 	int				number_of_philosophers;
@@ -52,15 +65,28 @@ typedef struct	s_ruleset
 	bool			stop;
 }				t_ruleset;
 
+/// @brief	Structure bearing
+/// @var	*ruleset Pointer to the structure holding the ruleset for the simu.
+/// @var	id The philosopher unique ID.
+/// @var	tid The thread ID for the corresponding philosopher.
+/// @var	last_meal Last meal's timestamp.
+/// @var	status The philosopher's status
+/// @var	is_replete Flag that signals if the philo ate `max_meals` meals.
+/// @var	nb_of_meals Number of meals the philosopher ate.
+/// @var	fork Mutex for the philosopher's fork.
+/// @var	philo_lock
+/// @var	*neighbor[2] Pointers to the philosopher's neighbor.
 typedef struct	s_philo
 {
 	t_ruleset		*ruleset;
 	int				id;
 	pthread_t		tid;
+	pthread_t		observator;
 	time_t			last_meal;
 	t_states 		status;
 	int				nb_of_meals;
-	pthread_mutex_t	l_fork;
+//	pthread_mutex_t	l_fork;
+	pthread_mutex_t	philo_lock;
 	struct	s_philo	*neighbor[2];
 }				t_philo;
 
@@ -71,7 +97,7 @@ t_error	init_simu(t_ruleset *ruleset);
 t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
 
 //----- ROUTINE -----//
-void	routine(t_philo *philo);
+void 	routine(t_philo *philo);
 void	philo_eat(t_philo *philo);
 void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);

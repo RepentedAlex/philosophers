@@ -12,8 +12,8 @@
 
 #include "philosophers.h"
 
-/// \brief Converts a string-exprimed number into an int.
-/// \param str The number exprimed in an array of character.
+/// \brief Converts a string-written number into an int.
+/// \param str The number written in an array of character.
 /// \return The number in an integer.
 int	ft_atoi(const char *str)
 {
