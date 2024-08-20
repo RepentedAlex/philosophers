@@ -18,7 +18,7 @@ void	supervisor(t_ruleset *ruleset)
 {
 	while (!ruleset->start_time)
 		ft_usleep(1);
-//	printf("Supervisor launched!\n");
+	printf("Supervisor launched!\n");
 	pthread_mutex_lock(&ruleset->ruleset_lock);
 	while (!ruleset->stop)
 	{
