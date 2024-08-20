@@ -41,12 +41,12 @@ void	ft_exit(t_ruleset *ruleset)
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
-		pthread_mutex_destroy(&ruleset->philos_array[i].printf_lock);
 		pthread_mutex_destroy(&ruleset->philos_array[i].philo_lock);
 		i++;
 	}
 	free(ruleset->philos_array);
 	pthread_mutex_destroy(&ruleset->ruleset_lock);
+	pthread_mutex_destroy(&ruleset->printf_lock);
 }
 
 void	join_all_threads(t_ruleset *ruleset)
@@ -91,8 +91,8 @@ int	ft_mprintf(char *str, t_philo *philo)
 {
 	int	ret;
 
-	pthread_mutex_lock(&philo->printf_lock);
+	pthread_mutex_lock(&philo->ruleset->printf_lock);
 	ret = printf("%ld %d %s", get_time(), philo->id, str);
-	pthread_mutex_unlock(&philo->printf_lock);
+	pthread_mutex_unlock(&philo->ruleset->printf_lock);
 	return (ret);
 }

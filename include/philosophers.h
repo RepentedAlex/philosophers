@@ -64,6 +64,7 @@ typedef struct	s_ruleset
 	int				nb_replete_philos;
 	bool			stop;
 	pthread_mutex_t	ruleset_lock;
+	pthread_mutex_t	printf_lock;
 }				t_ruleset;
 
 /// @brief	Structure bearing
@@ -87,7 +88,6 @@ typedef struct	s_philo
 	t_states 		status;
 	int				nb_of_meals;
 	pthread_mutex_t	philo_lock;
-	pthread_mutex_t	printf_lock;
 	struct	s_philo	*neighbor[2];
 }				t_philo;
 

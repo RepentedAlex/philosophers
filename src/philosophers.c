@@ -23,12 +23,13 @@ void	supervisor(t_ruleset *ruleset)
 	while (!ruleset->stop)
 	{
 		pthread_mutex_unlock(&ruleset->ruleset_lock);
+		pthread_mutex_lock(&ruleset->ruleset_lock);
 		if (ruleset->nb_replete_philos == ruleset->number_of_philosophers)
 		{
 			printf("All philos are replete!\n");
 			ruleset->stop = 1;
+			pthread_mutex_unlock(&ruleset->ruleset_lock);
 		}
-		pthread_mutex_lock(&ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&ruleset->ruleset_lock);
 	printf("Supervisor exiting!\n");
@@ -64,7 +65,6 @@ t_error	init_philos(t_ruleset *ruleset)
 		if (!ruleset->philos_array[i].tid)
 			return (ft_exit(ruleset), ERROR);
 		pthread_mutex_init(&ruleset->philos_array[i].philo_lock, NULL);
-		pthread_mutex_init(&ruleset->philos_array[i].printf_lock, NULL);
 		pthread_mutex_lock(&ruleset->philos_array[i].philo_lock);
 		ruleset->philos_array[i].last_meal = 0;
 		ruleset->philos_array[i].status = thinking;
@@ -93,6 +93,7 @@ t_error	parsing(int argc, t_ruleset *ruleset, char *argv[])
 {
 	memset(ruleset, 0, sizeof(t_ruleset));
 	pthread_mutex_init(&ruleset->ruleset_lock, NULL);
+	pthread_mutex_init(&ruleset->printf_lock, NULL);
 	if (argc != 5 && argc != 6)
 		return (ERROR);
 	ruleset->number_of_philosophers = ft_atoi(argv[1]);

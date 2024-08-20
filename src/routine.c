@@ -33,6 +33,7 @@ void	routine(t_philo *philo) {
 		{
 			pthread_mutex_lock(&philo->philo_lock);
 			philo->status = replete;
+			ft_mprintf("is replete\n", philo);
 			philo->ruleset->nb_replete_philos++;
 			pthread_mutex_unlock(&philo->philo_lock);
 			return ;
@@ -42,6 +43,9 @@ void	routine(t_philo *philo) {
 				->ruleset->time_to_die))
 		{
 			philo->status = dead;
+			pthread_mutex_lock(&philo->ruleset->printf_lock);
+			printf("%ld %d has died\n", get_time(), philo->id);
+			pthread_mutex_unlock(&philo->ruleset->printf_lock);
 //			ft_mprintf("died.\n", philo);
 			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 			philo->ruleset->stop = 1;
@@ -67,27 +71,25 @@ void	routine(t_philo *philo) {
 
 int	philo_eat(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->philo_lock);
+	//		ft_mprintf("has taken a fork\n", philo);
 	if (pthread_mutex_lock(&philo->neighbor[0]->philo_lock) == 0)
 	{
-//		ft_mprintf("has taken a fork\n", philo);
-		pthread_mutex_lock(&philo->philo_lock);
 //		ft_mprintf("has taken a fork\n", philo);
 		philo->status = eating;
 //		ft_mprintf("is eating\n", philo);
 		ft_usleep(philo->ruleset->time_to_eat);
-		pthread_mutex_unlock(&philo->philo_lock);
 		pthread_mutex_unlock(&philo->neighbor[0]->philo_lock);
+		pthread_mutex_unlock(&philo->philo_lock);
 	}
 	else if (pthread_mutex_lock(&philo->neighbor[1]->philo_lock) == 0)
 	{
 //		ft_mprintf("has taken a fork\n", philo);
-		pthread_mutex_lock(&philo->philo_lock);
-//		ft_mprintf("has taken a fork\n", philo);
 		philo->status = eating;
 //		ft_mprintf("is eating\n", philo);
 		ft_usleep(philo->ruleset->time_to_eat);
-		pthread_mutex_unlock(&philo->philo_lock);
 		pthread_mutex_unlock(&philo->neighbor[1]->philo_lock);
+		pthread_mutex_unlock(&philo->philo_lock);
 	}
 	else
 	{
