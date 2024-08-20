@@ -25,14 +25,13 @@ void	supervisor(t_ruleset *ruleset)
 		pthread_mutex_unlock(&ruleset->ruleset_lock);
 		if (ruleset->nb_replete_philos == ruleset->number_of_philosophers)
 		{
-//			printf("All philos are replete!\n");
+			printf("All philos are replete!\n");
 			ruleset->stop = 1;
 		}
 		pthread_mutex_lock(&ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&ruleset->ruleset_lock);
-//	join_all_threads(ruleset);
-//	printf("Supervisor exiting!\n");
+	printf("Supervisor exiting!\n");
 }
 
 /// @brief
