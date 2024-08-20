@@ -46,6 +46,7 @@ void	join_all_threads(t_ruleset *ruleset)
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
+		printf("Joining Philo [%d]\n", ruleset->philos_array[i].id);
 		pthread_join(ruleset->philos_array[i].tid, NULL);
 		i++;
 	}

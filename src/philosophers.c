@@ -14,6 +14,8 @@
 
 void	supervisor(t_ruleset *ruleset)
 {
+	while (!ruleset->start_time)
+		ft_usleep(1);
 	printf("Supervisor launched!\n");
 	while (ruleset->start_time && !ruleset->stop)
 	{
@@ -21,19 +23,25 @@ void	supervisor(t_ruleset *ruleset)
 		{
 			printf("All philos are replete!\n");
 			ruleset->stop = 1;
-
 		}
 	}
+	join_all_threads(ruleset);
 	printf("Supervisor exiting!\n");
 }
 
 t_error observator(t_philo *philo)
 {
+	while (!philo->ruleset->start_time)
+		ft_usleep(1);
 	printf("Philo [%d] observator launched!\n", philo->id);
 	while (!philo->ruleset->stop)
 	{
-		if (philo->status != eating && get_time() - philo->last_meal <= 0)
+		if (philo->status != eating && (get_time() - philo->last_meal > philo
+		->ruleset->time_to_die))
 		{
+			printf("%ld : Philo [%d] has died:\n", get_time(), philo->id);
+			printf("%ld\n", philo->last_meal);
+			printf("Philo [%d] last meal: ^\n", philo->id);
 			pthread_mutex_lock(&philo->philo_lock);
 			philo->status = dead;
 			philo->ruleset->stop = 1;
@@ -93,8 +101,6 @@ t_error	init_philos(t_ruleset *ruleset)
 			ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[i +
 																		  1];
 		pthread_mutex_unlock(&ruleset->philos_array[i].philo_lock);
-		pthread_create(&ruleset->philos_array[i].observator, NULL, (void *)
-		&observator, (void *)&ruleset->philos_array[i]);
 		i++;
 	}
 	return (NO_ERROR);
@@ -164,7 +170,7 @@ int	main(int argc, char *argv[])
 	if (init_simu(ruleset))
 		return (ERROR);
 	supervisor(ruleset);
-	join_all_threads(ruleset);
+//	join_all_threads(ruleset);
 	ft_exit(ruleset);
 	return (NO_ERROR);
 }
