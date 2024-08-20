@@ -85,8 +85,8 @@ typedef struct	s_philo
 	time_t			last_meal;
 	t_states 		status;
 	int				nb_of_meals;
-//	pthread_mutex_t	l_fork;
 	pthread_mutex_t	philo_lock;
+	pthread_mutex_t	printf_lock;
 	struct	s_philo	*neighbor[2];
 }				t_philo;
 
@@ -98,7 +98,7 @@ t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
 
 //----- ROUTINE -----//
 void 	routine(t_philo *philo);
-void	philo_eat(t_philo *philo);
+int philo_eat(t_philo *philo);
 void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
@@ -106,6 +106,7 @@ void	philo_think(t_philo *philo);
 int		ft_atoi(const char *str);
 void	ft_error(char *str, t_ruleset *ruleset);
 void	ft_exit(t_ruleset *ruleset);
+int		ft_mprintf(char *str, t_philo *philo);
 time_t	get_time(void);
 int 	ft_usleep(u_int64_t time);
 void	join_all_threads(t_ruleset *ruleset);
