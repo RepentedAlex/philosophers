@@ -42,7 +42,7 @@ void	routine(t_philo *philo) {
 				->ruleset->time_to_die))
 		{
 			philo->status = dead;
-			ft_mprintf("died.\n", philo);
+//			ft_mprintf("died.\n", philo);
 			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 			philo->ruleset->stop = 1;
 			pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
