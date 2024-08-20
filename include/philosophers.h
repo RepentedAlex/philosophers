@@ -63,6 +63,7 @@ typedef struct	s_ruleset
 	time_t			start_time;
 	int				nb_replete_philos;
 	bool			stop;
+	pthread_mutex_t	ruleset_lock;
 }				t_ruleset;
 
 /// @brief	Structure bearing
@@ -103,6 +104,7 @@ void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
 //----- UTILS -----//
+int		check_simu_stop(t_ruleset *ruleset);
 int		ft_atoi(const char *str);
 void	ft_error(char *str, t_ruleset *ruleset);
 void	ft_exit(t_ruleset *ruleset);

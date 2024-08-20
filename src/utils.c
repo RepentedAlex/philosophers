@@ -46,6 +46,7 @@ void	ft_exit(t_ruleset *ruleset)
 		i++;
 	}
 	free(ruleset->philos_array);
+	pthread_mutex_destroy(&ruleset->ruleset_lock);
 }
 
 void	join_all_threads(t_ruleset *ruleset)
