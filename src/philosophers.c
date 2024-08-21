@@ -25,7 +25,26 @@ t_error	init_simu(t_ruleset *ruleset)
 	return (NO_ERROR);
 }
 
-//TODO : Shorten function
+static void	internal_init_philo(const t_ruleset *ruleset, int i)
+{
+	pthread_mutex_lock(&ruleset->philos_array[i].philo_lock);
+	ruleset->philos_array[i].last_meal = 0;
+	ruleset->philos_array[i].status = thinking;
+	ruleset->philos_array[i].nb_of_meals = 0;
+	if (i == 0)
+		ruleset->philos_array[i].neighbor[0] = \
+		&ruleset->philos_array[ruleset->number_of_philosophers - 1];
+	else
+		ruleset->philos_array[i].neighbor[0] = \
+		&ruleset->philos_array[i - 1];
+	if (i == ruleset->number_of_philosophers - 1)
+		ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[0];
+	else
+		ruleset->philos_array[i].neighbor[1] = \
+		&ruleset->philos_array[i + 1];
+	pthread_mutex_unlock(&ruleset->philos_array[i].philo_lock);
+}
+
 /// @brief Initialises the array of philos.
 /// @param ruleset A pointer to the ruleset structure.
 /// @return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
@@ -43,22 +62,7 @@ t_error	init_philos(t_ruleset *ruleset)
 		if (!ruleset->philos_array[i].tid)
 			return (ft_exit(ruleset), ERROR);
 		pthread_mutex_init(&ruleset->philos_array[i].philo_lock, NULL);
-		pthread_mutex_lock(&ruleset->philos_array[i].philo_lock);
-		ruleset->philos_array[i].last_meal = 0;
-		ruleset->philos_array[i].status = thinking;
-		ruleset->philos_array[i].nb_of_meals = 0;
-		if (i == 0)
-			ruleset->philos_array[i].neighbor[0] = \
-			&ruleset->philos_array[ruleset->number_of_philosophers - 1];
-		else
-			ruleset->philos_array[i].neighbor[0] = \
-			&ruleset->philos_array[i - 1];
-		if (i == ruleset->number_of_philosophers - 1)
-			ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[0];
-		else
-			ruleset->philos_array[i].neighbor[1] = \
-			&ruleset->philos_array[i + 1];
-		pthread_mutex_unlock(&ruleset->philos_array[i].philo_lock);
+		internal_init_philo(ruleset, i);
 		i++;
 	}
 	return (NO_ERROR);
@@ -84,30 +88,6 @@ t_error	parsing(int argc, t_ruleset *ruleset, char *argv[])
 	if (ruleset->number_of_philosophers < MIN_PHILO || \
 	ruleset->number_of_philosophers > MAX_PHILO)
 		return (ERROR);
-	return (NO_ERROR);
-}
-
-/// @brief Checks for invalid characters in the passed arguments.
-/// @param argc Number of CLI arguments.
-/// @param argv CLI arguments.
-/// @return ERROR(1) if a non-digit character is encountered, else NO_ERROR(O).
-t_error	check_input(char *argv[])
-{
-	int	i;
-	int	j;
-
-	i = 1;
-	while (argv[i])
-	{
-		j = 0;
-		while (argv[i][j])
-		{
-			if (argv[i][j] < '0' || argv[i][j] > '9')
-				return (ERROR);
-			j++;
-		}
-		i++;
-	}
 	return (NO_ERROR);
 }
 

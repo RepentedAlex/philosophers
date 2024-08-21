@@ -42,3 +42,27 @@ void	wait_for_start(const t_philo *philo)
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 }
+
+bool	check_stop(t_philo *philo)
+{
+	bool	ret;
+
+	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	if (philo->ruleset->stop)
+		ret = true;
+	else
+		ret = false;
+	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+	return (ret);
+}
+
+void	set_philo_replete(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->philo_lock);
+	philo->status = replete;
+	ft_mprintf("is replete\n", philo);
+	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	philo->ruleset->nb_replete_philos++;
+	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+	pthread_mutex_unlock(&philo->philo_lock);
+}

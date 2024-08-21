@@ -48,7 +48,8 @@ SRC_FILES	=	philosophers \
 				routine \
 				supervisor \
 				utils \
-				utils2
+				utils2 \
+				utils3
 
 ########################
 ## INTERMEDIARY FILES ##
