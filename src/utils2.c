@@ -1,0 +1,44 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils2.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/21 17:49:17 by apetitco          #+#    #+#             */
+/*   Updated: 2024/08/21 17:49:30 by apetitco         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "philosophers.h"
+
+time_t	get_time(void)
+{
+	struct timeval	timeval;
+
+	if (gettimeofday(&timeval, NULL))
+		return (ft_error("gettimeofday() failed.\n", NULL), (time_t) NULL);
+	return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
+}
+
+int	ft_usleep(u_int64_t	time)
+{
+	u_int64_t	start;
+
+	start = get_time();
+	while ((get_time() - start) < time)
+		usleep(time / 10);
+	return (0);
+}
+
+void	wait_for_start(const t_philo *philo)
+{
+	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	while (!philo->ruleset->start_time)
+	{
+		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+		ft_usleep(100);
+		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	}
+	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+}

@@ -102,8 +102,11 @@ int philo_eat(t_philo *philo);
 void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
+//----- SUPERVISOR -----//
+void	supervisor(t_ruleset *ruleset);
+
 //----- UTILS -----//
-int		check_simu_stop(t_ruleset *ruleset);
+bool	check_stop(t_philo *philo);
 int		ft_atoi(const char *str);
 void	ft_error(char *str, t_ruleset *ruleset);
 void	ft_exit(t_ruleset *ruleset);
@@ -111,5 +114,6 @@ int		ft_mprintf(char *str, t_philo *philo);
 time_t	get_time(void);
 int 	ft_usleep(u_int64_t time);
 void	join_all_threads(t_ruleset *ruleset);
+void	wait_for_start(const t_philo *philo);
 
 #endif

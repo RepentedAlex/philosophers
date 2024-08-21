@@ -46,7 +46,9 @@ TES_DIR	=	tests/
 
 SRC_FILES	=	philosophers \
 				routine \
-				utils
+				supervisor \
+				utils \
+				utils2
 
 ########################
 ## INTERMEDIARY FILES ##

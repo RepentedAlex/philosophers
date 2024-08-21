@@ -56,19 +56,9 @@ void	join_all_threads(t_ruleset *ruleset)
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
-//		printf("Joining Philo [%d]\n", ruleset->philos_array[i].id);
 		pthread_join(ruleset->philos_array[i].tid, NULL);
 		i++;
 	}
-}
-
-time_t	get_time(void)
-{
-	struct timeval	timeval;
-
-	if (gettimeofday(&timeval, NULL))
-		return (ft_error("gettimeofday() failed.\n", NULL), (time_t) NULL);
-	return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
 }
 
 void	ft_error(char *str, t_ruleset *ruleset)
@@ -77,24 +67,14 @@ void	ft_error(char *str, t_ruleset *ruleset)
 	ft_exit(ruleset);
 }
 
-int	ft_usleep(u_int64_t	time)
-{
-	u_int64_t	start;
-
-	start = get_time();
-	while ((get_time() - start) < time)
-		usleep(time / 10);
-	return (0);
-}
-
 int	ft_mprintf(char *str, t_philo *philo)
 {
-	static	pthread_mutex_t	printf_lock = PTHREAD_MUTEX_INITIALIZER;
-	int 					ret;
+	static pthread_mutex_t	printf_lock = PTHREAD_MUTEX_INITIALIZER;
+	int						ret;
 
 	pthread_mutex_lock(&printf_lock);
 	if (!philo)
-		ret =printf("%s", str);
+		ret = printf("%s", str);
 	else
 		ret = printf("%ld %d %s", get_time(), philo->id, str);
 	pthread_mutex_unlock(&printf_lock);
