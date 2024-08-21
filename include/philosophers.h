@@ -64,7 +64,6 @@ typedef struct	s_ruleset
 	int				nb_replete_philos;
 	bool			stop;
 	pthread_mutex_t	ruleset_lock;
-	pthread_mutex_t	printf_lock;
 }				t_ruleset;
 
 /// @brief	Structure bearing

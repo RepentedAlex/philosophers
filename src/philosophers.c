@@ -18,7 +18,7 @@ void	supervisor(t_ruleset *ruleset)
 {
 	while (!ruleset->start_time)
 		ft_usleep(1);
-	printf("Supervisor launched!\n");
+	ft_mprintf("Supervisor launched!\n", NULL);
 	pthread_mutex_lock(&ruleset->ruleset_lock);
 	while (!ruleset->stop)
 	{
@@ -26,13 +26,15 @@ void	supervisor(t_ruleset *ruleset)
 		pthread_mutex_lock(&ruleset->ruleset_lock);
 		if (ruleset->nb_replete_philos == ruleset->number_of_philosophers)
 		{
-			printf("All philos are replete!\n");
+			ft_mprintf("All philos are replete!\n", NULL);
 			ruleset->stop = 1;
 			pthread_mutex_unlock(&ruleset->ruleset_lock);
 		}
+		else
+			pthread_mutex_unlock(&ruleset->ruleset_lock);
+		pthread_mutex_lock(&ruleset->ruleset_lock);
 	}
-	pthread_mutex_unlock(&ruleset->ruleset_lock);
-	printf("Supervisor exiting!\n");
+	ft_mprintf("Supervisor exiting!\n", NULL);
 }
 
 /// @brief
@@ -93,7 +95,6 @@ t_error	parsing(int argc, t_ruleset *ruleset, char *argv[])
 {
 	memset(ruleset, 0, sizeof(t_ruleset));
 	pthread_mutex_init(&ruleset->ruleset_lock, NULL);
-	pthread_mutex_init(&ruleset->printf_lock, NULL);
 	if (argc != 5 && argc != 6)
 		return (ERROR);
 	ruleset->number_of_philosophers = ft_atoi(argv[1]);

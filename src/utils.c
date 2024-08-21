@@ -46,7 +46,6 @@ void	ft_exit(t_ruleset *ruleset)
 	}
 	free(ruleset->philos_array);
 	pthread_mutex_destroy(&ruleset->ruleset_lock);
-	pthread_mutex_destroy(&ruleset->printf_lock);
 }
 
 void	join_all_threads(t_ruleset *ruleset)
@@ -89,10 +88,14 @@ int	ft_usleep(u_int64_t	time)
 
 int	ft_mprintf(char *str, t_philo *philo)
 {
-	int	ret;
+	static	pthread_mutex_t	printf_lock = PTHREAD_MUTEX_INITIALIZER;
+	int 					ret;
 
-	pthread_mutex_lock(&philo->ruleset->printf_lock);
-	ret = printf("%ld %d %s", get_time(), philo->id, str);
-	pthread_mutex_unlock(&philo->ruleset->printf_lock);
+	pthread_mutex_lock(&printf_lock);
+	if (!philo)
+		ret =printf("%s", str);
+	else
+		ret = printf("%ld %d %s", get_time(), philo->id, str);
+	pthread_mutex_unlock(&printf_lock);
 	return (ret);
 }

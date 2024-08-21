@@ -12,18 +12,24 @@
 
 #include "philosophers.h"
 
-void	routine(t_philo *philo) {
-	int first_round;
-
-	first_round = 0;
+void wait_for_start(const t_philo *philo)
+{
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->start_time)
 	{
 		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-		ft_usleep(1);
+		ft_usleep(100);
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+}
+
+void	routine(t_philo *philo)
+{
+	int first_round;
+
+	first_round = 0;
+	wait_for_start(philo);
 	philo->last_meal = philo->ruleset->start_time;
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->stop && philo->status != replete)
@@ -34,19 +40,19 @@ void	routine(t_philo *philo) {
 			pthread_mutex_lock(&philo->philo_lock);
 			philo->status = replete;
 			ft_mprintf("is replete\n", philo);
+			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 			philo->ruleset->nb_replete_philos++;
+			pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 			pthread_mutex_unlock(&philo->philo_lock);
 			return ;
 		}
 		pthread_mutex_lock(&philo->philo_lock);
-		if (philo->status != eating && (get_time() - philo->last_meal > philo
-				->ruleset->time_to_die))
+		if (philo->status != eating && (get_time() - \
+		philo->last_meal > philo->ruleset->time_to_die))
 		{
 			philo->status = dead;
-			pthread_mutex_lock(&philo->ruleset->printf_lock);
-			printf("%ld %d has died\n", get_time(), philo->id);
-			pthread_mutex_unlock(&philo->ruleset->printf_lock);
-//			ft_mprintf("died.\n", philo);
+//			printf("%ld %d has died\n", get_time(), philo->id);
+			ft_mprintf("died.\n", philo);
 			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 			philo->ruleset->stop = 1;
 			pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
@@ -71,22 +77,26 @@ void	routine(t_philo *philo) {
 
 int	philo_eat(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->philo_lock);
-	//		ft_mprintf("has taken a fork\n", philo);
-	if (pthread_mutex_lock(&philo->neighbor[0]->philo_lock) == 0)
+	if (philo->id % 2 == 0)
 	{
-//		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->neighbor[0]->philo_lock);
+		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->philo_lock);
+		ft_mprintf("has taken a fork\n", philo);
 		philo->status = eating;
-//		ft_mprintf("is eating\n", philo);
+		ft_mprintf("is eating\n", philo);
 		ft_usleep(philo->ruleset->time_to_eat);
 		pthread_mutex_unlock(&philo->neighbor[0]->philo_lock);
 		pthread_mutex_unlock(&philo->philo_lock);
 	}
-	else if (pthread_mutex_lock(&philo->neighbor[1]->philo_lock) == 0)
+	else if (philo->id % 1 == 0)
 	{
-//		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->neighbor[1]->philo_lock);
+		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->philo_lock);
+		ft_mprintf("has taken a fork\n", philo);
 		philo->status = eating;
-//		ft_mprintf("is eating\n", philo);
+		ft_mprintf("is eating\n", philo);
 		ft_usleep(philo->ruleset->time_to_eat);
 		pthread_mutex_unlock(&philo->neighbor[1]->philo_lock);
 		pthread_mutex_unlock(&philo->philo_lock);
@@ -110,7 +120,7 @@ void	philo_sleep(t_philo *philo)
 	if (philo->status == replete)
 		return ;
 	philo->status = sleeping;
-//	ft_mprintf("is sleeping\n", philo);
+	ft_mprintf("is sleeping\n", philo);
 	ft_usleep(philo->ruleset->time_to_sleep);
 	philo_think(philo);
 }
@@ -118,5 +128,5 @@ void	philo_sleep(t_philo *philo)
 void	philo_think(t_philo *philo)
 {
 	philo->status = thinking;
-//	ft_mprintf("is thinking\n", philo);
+	ft_mprintf("is thinking\n", philo);
 }
