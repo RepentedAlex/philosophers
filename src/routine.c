@@ -23,7 +23,8 @@ void	routine(t_philo *philo)
 	while (!philo->ruleset->stop && philo->status != replete)
 	{
 		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-		if (philo->nb_of_meals >= philo->ruleset->max_meals)
+		if (philo->ruleset->max_meals != -1 && \
+		philo->nb_of_meals >= philo->ruleset->max_meals)
 			return (set_philo_replete(philo));
 		pthread_mutex_lock(&philo->philo_lock);
 		if (philo->status != eating && (get_time() - \

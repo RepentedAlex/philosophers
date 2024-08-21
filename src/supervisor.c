@@ -24,7 +24,8 @@ void	supervisor(t_ruleset *ruleset)
 	{
 		pthread_mutex_unlock(&ruleset->ruleset_lock);
 		pthread_mutex_lock(&ruleset->ruleset_lock);
-		if (ruleset->nb_replete_philos == ruleset->number_of_philosophers)
+		if (ruleset->max_meals != -1 && \
+		ruleset->nb_replete_philos == ruleset->number_of_philosophers)
 		{
 			ft_mprintf("All philos are replete!\n", NULL);
 			ruleset->stop = 1;
