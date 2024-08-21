@@ -16,9 +16,9 @@ void	routine(t_philo *philo)
 {
 	int	first_round;
 
-	first_round = 0;
-	wait_for_start(philo);
-	philo->last_meal = philo->ruleset->start_time;
+	wait_for_start(philo, &first_round);
+	if (philo->ruleset->number_of_philosophers == 1)
+		return (lonely_philo(philo));
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->stop && philo->status != replete)
 	{

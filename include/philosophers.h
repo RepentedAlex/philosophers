@@ -97,8 +97,9 @@ t_error	init_simu(t_ruleset *ruleset);
 t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
 
 //----- ROUTINE -----//
+void	lonely_philo(t_philo *philo);
 void 	routine(t_philo *philo);
-int philo_eat(t_philo *philo);
+int 	philo_eat(t_philo *philo);
 void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
@@ -117,6 +118,6 @@ int 	ft_usleep(u_int64_t time);
 void	join_all_threads(t_ruleset *ruleset);
 void	set_philo_dead(t_philo *philo);
 void	set_philo_replete(t_philo *philo);
-void	wait_for_start(const t_philo *philo);
+void	wait_for_start(t_philo *philo, int *first_round);
 
 #endif

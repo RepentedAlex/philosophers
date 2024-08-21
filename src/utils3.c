@@ -54,3 +54,9 @@ t_error	check_input(char *argv[])
 	}
 	return (NO_ERROR);
 }
+
+void	lonely_philo(t_philo *philo)
+{
+	ft_usleep(philo->ruleset->time_to_die);
+	set_philo_dead(philo);
+}
