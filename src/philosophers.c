@@ -35,6 +35,7 @@ void	supervisor(t_ruleset *ruleset)
 		pthread_mutex_lock(&ruleset->ruleset_lock);
 	}
 	ft_mprintf("Supervisor exiting!\n", NULL);
+	pthread_mutex_unlock(&ruleset->ruleset_lock);
 }
 
 /// @brief

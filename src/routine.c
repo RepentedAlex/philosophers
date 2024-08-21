@@ -91,9 +91,9 @@ int	philo_eat(t_philo *philo)
 	}
 	else if (philo->id % 1 == 0)
 	{
-		pthread_mutex_lock(&philo->neighbor[1]->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
 		pthread_mutex_lock(&philo->philo_lock);
+		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->neighbor[1]->philo_lock);
 		ft_mprintf("has taken a fork\n", philo);
 		philo->status = eating;
 		ft_mprintf("is eating\n", philo);
