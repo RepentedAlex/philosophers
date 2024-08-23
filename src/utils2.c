@@ -33,7 +33,8 @@ int	ft_usleep(u_int64_t	time)
 
 void	wait_for_start(t_philo *philo, int *first_round)
 {
-	*first_round = 0;
+	if (first_round)
+		*first_round = 0;
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->start_time)
 	{
@@ -42,7 +43,9 @@ void	wait_for_start(t_philo *philo, int *first_round)
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+	pthread_mutex_lock(&philo->philo_lock);
 	philo->last_meal = philo->ruleset->start_time;
+	pthread_mutex_unlock(&philo->philo_lock);
 }
 
 bool	check_stop(t_philo *philo)

@@ -53,10 +53,13 @@ void	join_all_threads(t_ruleset *ruleset)
 {
 	int	i;
 
+	if (!ruleset)
+		return ;
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
 		pthread_join(ruleset->philos_array[i].tid, NULL);
+		pthread_join(ruleset->philos_array[i].observator, NULL);
 		i++;
 	}
 }

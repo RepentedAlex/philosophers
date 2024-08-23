@@ -14,68 +14,46 @@
 
 void	routine(t_philo *philo)
 {
-	int	first_round;
-
-	wait_for_start(philo, &first_round);
-	if (philo->ruleset->number_of_philosophers == 1)
-		return (lonely_philo(philo));
-	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
-	while (!philo->ruleset->stop && philo->status != replete)
+	if (pthread_create(&philo->observator, NULL, (void *) \
+    &supervisor, (void*)&philo))
+		return ;
+	while (!philo->dead)
 	{
-		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-		if (philo->ruleset->max_meals != -1 && \
-		philo->nb_of_meals >= philo->ruleset->max_meals)
-			return (set_philo_replete(philo));
-		pthread_mutex_lock(&philo->philo_lock);
-		if (philo->status != eating && (get_time() - \
-		philo->last_meal > philo->ruleset->time_to_die))
-			set_philo_dead(philo);
-		else
-			pthread_mutex_unlock(&philo->philo_lock);
-		if (first_round == 0)
-			do_first_round(philo, &first_round);
-		else if (philo_eat(philo))
-			philo_sleep(philo);
-		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+		philo_eat(philo);
 	}
-	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+	if (pthread_join(philo->observator, NULL))
+		return ;
 }
 
-static void	internal_philo_eat(t_philo *philo, int neighbor)
+static void	internal_philo_eat(t_philo *philo)
 {
-	if (neighbor == 0)
-	{
-		pthread_mutex_lock(&philo->neighbor[neighbor]->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-		pthread_mutex_lock(&philo->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-	}
-	else
-	{
-		pthread_mutex_lock(&philo->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-		pthread_mutex_lock(&philo->neighbor[neighbor]->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-	}
+	if (!philo)
+		return ;
+	ft_mprintf("has taken a fork\n", philo);
+	pthread_mutex_lock(&philo->philo_lock);
+	pthread_mutex_lock(&philo->neighbor->philo_lock);
+	ft_mprintf("has taken his neighbor's fork\n", philo);
 	philo->status = eating;
 	ft_mprintf("is eating\n", philo);
 	ft_usleep(philo->ruleset->time_to_eat);
-	pthread_mutex_unlock(&philo->neighbor[neighbor]->philo_lock);
 	pthread_mutex_unlock(&philo->philo_lock);
+	pthread_mutex_unlock(&philo->neighbor->philo_lock);
 }
 
 int	philo_eat(t_philo *philo)
 {
 	if (check_stop(philo) == true)
 		return (1);
-	if (philo->id % 2 == 0)
-		internal_philo_eat(philo, 0);
-	else if (philo->id % 1 == 0)
-		internal_philo_eat(philo, 1);
-	else
-		return (1);
+	internal_philo_eat(philo);
 	philo->last_meal = get_time();
 	philo->nb_of_meals++;
+	if (philo->nb_of_meals == philo->ruleset->max_meals)
+	{
+		philo->status = replete;
+		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+		philo->ruleset->nb_replete_philos++;
+		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+	}
 	philo_sleep(philo);
 	return (0);
 }
@@ -88,7 +66,9 @@ void	philo_sleep(t_philo *philo)
 		return ;
 	if (philo->status == replete)
 		return ;
+	pthread_mutex_lock(&philo->philo_lock);
 	philo->status = sleeping;
+	pthread_mutex_unlock(&philo->philo_lock);
 	ft_mprintf("is sleeping\n", philo);
 	ft_usleep(philo->ruleset->time_to_sleep);
 	philo_think(philo);
@@ -96,8 +76,8 @@ void	philo_sleep(t_philo *philo)
 
 void	philo_think(t_philo *philo)
 {
-	if (check_stop(philo) == true)
-		return ;
+	pthread_mutex_lock(&philo->philo_lock);
 	philo->status = thinking;
+	pthread_mutex_unlock(&philo->philo_lock);
 	ft_mprintf("is thinking\n", philo);
 }

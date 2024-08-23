@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   supervisor.c                                       :+:      :+:    :+:   */
+/*   monitor.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -14,10 +14,8 @@
 
 /// @brief Monitors if all philos are replete to stop the simulation.
 /// @param ruleset A pointer to the ruleset structure.
-void	supervisor(t_ruleset *ruleset)
+void	monitor(t_ruleset *ruleset)
 {
-	while (!ruleset->start_time)
-		ft_usleep(1);
 	ft_mprintf("Supervisor launched!\n", NULL);
 	pthread_mutex_lock(&ruleset->ruleset_lock);
 	while (!ruleset->stop)
@@ -35,6 +33,24 @@ void	supervisor(t_ruleset *ruleset)
 			pthread_mutex_unlock(&ruleset->ruleset_lock);
 		pthread_mutex_lock(&ruleset->ruleset_lock);
 	}
-	ft_mprintf("Supervisor exiting!\n", NULL);
 	pthread_mutex_unlock(&ruleset->ruleset_lock);
+	ft_mprintf("Supervisor exiting!\n", NULL);
+}
+
+void supervisor(t_philo *philo)
+{
+	while (!philo->dead)
+	{
+		pthread_mutex_lock(&philo->philo_lock);
+		if ((get_time() - philo->last_meal) >= philo->ruleset->time_to_die \
+		&& philo->status != eating)
+		{
+			philo->status = dead;
+			ft_mprintf("has died\n", philo);
+			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+			philo->ruleset->stop = 1;
+			pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+		}
+		pthread_mutex_unlock(&philo->philo_lock);
+	}
 }

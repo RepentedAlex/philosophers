@@ -56,6 +56,7 @@ typedef struct	s_ruleset
 {
 	int				number_of_philosophers;
 	struct s_philo	*philos_array;
+	pthread_t		monitor;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
@@ -85,15 +86,16 @@ typedef struct	s_philo
 	pthread_t		observator;
 	time_t			last_meal;
 	t_states 		status;
+	bool			dead;
 	int				nb_of_meals;
 	pthread_mutex_t	philo_lock;
-	struct	s_philo	*neighbor[2];
+	struct	s_philo	*neighbor;
 }				t_philo;
 
 //----- INITIALISATION -----//
 t_error	check_input(char *argv[]);
 t_error	init_philos(t_ruleset *ruleset);
-t_error	init_simu(t_ruleset *ruleset);
+t_error	thread_handling(t_ruleset *ruleset);
 t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
 
 //----- ROUTINE -----//
@@ -104,7 +106,8 @@ void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
 //----- SUPERVISOR -----//
-void	supervisor(t_ruleset *ruleset);
+void	supervisor(t_philo *philo);
+void	monitor(t_ruleset *ruleset);
 
 //----- UTILS -----//
 bool	check_stop(t_philo *philo);
