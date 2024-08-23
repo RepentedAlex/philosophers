@@ -123,7 +123,6 @@ int	main(int argc, char *argv[])
 		return (ERROR);
 	if (thread_handling(ruleset))
 		return (ERROR);
-//	monitor(ruleset);
 	join_all_threads(ruleset);
 	ft_exit(ruleset);
 	return (NO_ERROR);
