@@ -17,7 +17,7 @@ time_t	get_time(void)
 	struct timeval	timeval;
 
 	if (gettimeofday(&timeval, NULL))
-		return (ft_error("gettimeofday() failed.\n", NULL), (time_t) NULL);
+		return ((time_t)NULL);
 	return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
 }
 
@@ -44,7 +44,7 @@ void	wait_for_start(t_philo *philo, int *first_round)
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 	pthread_mutex_lock(&philo->philo_lock);
-	philo->last_meal = philo->ruleset->start_time;
+	philo->remaining_time = philo->ruleset->start_time;
 	pthread_mutex_unlock(&philo->philo_lock);
 }
 

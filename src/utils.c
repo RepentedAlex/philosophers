@@ -41,10 +41,10 @@ void	ft_exit(t_ruleset *ruleset)
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
-		pthread_mutex_destroy(&ruleset->philos_array[i].philo_lock);
+		pthread_mutex_destroy(&ruleset->philos[i].philo_lock);
 		i++;
 	}
-	free(ruleset->philos_array);
+	free(ruleset->philos);
 	pthread_mutex_destroy(&ruleset->ruleset_lock);
 	free(ruleset);
 }
@@ -58,8 +58,8 @@ void	join_all_threads(t_ruleset *ruleset)
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
-		pthread_join(ruleset->philos_array[i].tid, NULL);
-		pthread_join(ruleset->philos_array[i].observator, NULL);
+		pthread_join(ruleset->philos[i].tid, NULL);
+		pthread_join(ruleset->philos[i].supervis, NULL);
 		i++;
 	}
 }

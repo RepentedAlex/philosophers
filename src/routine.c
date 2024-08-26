@@ -14,14 +14,14 @@
 
 void	routine(t_philo *philo)
 {
-	if (pthread_create(&philo->observator, NULL, (void *) \
+	if (pthread_create(&philo->supervis, NULL, (void *) \
     &supervisor, (void*)&philo))
 		return ;
-	while (!philo->dead)
+	while (!philo->dead && !philo->ruleset->stop)
 	{
 		philo_eat(philo);
 	}
-	if (pthread_join(philo->observator, NULL))
+	if (pthread_join(philo->supervis, NULL))
 		return ;
 }
 
@@ -45,15 +45,11 @@ int	philo_eat(t_philo *philo)
 	if (check_stop(philo) == true)
 		return (1);
 	internal_philo_eat(philo);
-	philo->last_meal = get_time();
+	pthread_mutex_lock(&philo->philo_lock);
+	philo->remaining_time = get_time();
 	philo->nb_of_meals++;
-	if (philo->nb_of_meals == philo->ruleset->max_meals)
-	{
-		philo->status = replete;
-		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
-		philo->ruleset->nb_replete_philos++;
-		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-	}
+	pthread_mutex_unlock(&philo->philo_lock);
+	pthread_mutex_lock(&philo->philo_lock);
 	philo_sleep(philo);
 	return (0);
 }
