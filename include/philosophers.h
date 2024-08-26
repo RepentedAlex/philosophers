@@ -56,11 +56,11 @@ typedef struct	s_ruleset
 {
 	int				number_of_philosophers;
 	struct s_philo	*philos_array;
-	time_t			time_to_die;
-	time_t			time_to_eat;
-	time_t			time_to_sleep;
+	u_int64_t		time_to_die;
+	u_int64_t		time_to_eat;
+	u_int64_t		time_to_sleep;
 	int				max_meals;
-	time_t			start_time;
+	u_int64_t		start_time;
 	int				nb_replete_philos;
 	bool			stop;
 	pthread_mutex_t	ruleset_lock;
@@ -83,8 +83,9 @@ typedef struct	s_philo
 	int				id;
 	pthread_t		tid;
 	pthread_t		observator;
-	time_t			last_meal;
+//	time_t			last_meal;
 	t_states 		status;
+	u_int64_t 		time_remaining;
 	int				nb_of_meals;
 	pthread_mutex_t	philo_lock;
 	struct	s_philo	*neighbor;
@@ -104,20 +105,21 @@ void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
 //----- SUPERVISOR -----//
+void	monitor(t_philo *philo);
 void	supervisor(t_ruleset *ruleset);
 
 //----- UTILS -----//
-bool	check_stop(t_philo *philo);
-void	do_first_round(t_philo *philo, int *flag);
-int		ft_atoi(const char *str);
-void	ft_error(char *str, t_ruleset *ruleset);
-void	ft_exit(t_ruleset *ruleset);
-int		ft_mprintf(char *str, t_philo *philo);
-time_t	get_time(void);
-int 	ft_usleep(u_int64_t time);
-void	join_all_threads(t_ruleset *ruleset);
-void	set_philo_dead(t_philo *philo);
-void	set_philo_replete(t_philo *philo);
-void	wait_for_start(t_philo *philo, int *first_round);
+bool		check_stop(t_philo *philo);
+void		do_first_round(t_philo *philo, int *flag);
+int			ft_atoi(const char *str);
+void		ft_error(char *str, t_ruleset *ruleset);
+void		ft_exit(t_ruleset *ruleset);
+int			ft_mprintf(char *str, t_philo *philo);
+u_int64_t	get_time(void);
+int 		ft_usleep(u_int64_t time);
+void		join_all_threads(t_ruleset *ruleset);
+void		set_philo_dead(t_philo *philo);
+void		set_philo_replete(t_philo *philo);
+void		wait_for_start(t_philo *philo, int *first_round);
 
 #endif

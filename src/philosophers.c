@@ -28,7 +28,7 @@ t_error	init_simu(t_ruleset *ruleset)
 static void	internal_init_philo(const t_ruleset *ruleset, int i)
 {
 	pthread_mutex_lock(&ruleset->philos_array[i].philo_lock);
-	ruleset->philos_array[i].last_meal = 0;
+//	ruleset->philos_array[i].last_meal = 0;
 	ruleset->philos_array[i].status = thinking;
 	ruleset->philos_array[i].nb_of_meals = 0;
 	if (i == 0)

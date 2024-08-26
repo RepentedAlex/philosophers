@@ -12,7 +12,7 @@
 
 #include "philosophers.h"
 
-time_t	get_time(void)
+u_int64_t get_time(void)
 {
 	struct timeval	timeval;
 
@@ -42,7 +42,7 @@ void	wait_for_start(t_philo *philo, int *first_round)
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-	philo->last_meal = philo->ruleset->start_time;
+	philo->time_remaining = get_time() + philo->ruleset->start_time;
 }
 
 bool	check_stop(t_philo *philo)

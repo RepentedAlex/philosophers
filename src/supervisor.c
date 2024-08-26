@@ -38,3 +38,31 @@ void	supervisor(t_ruleset *ruleset)
 	ft_mprintf("Supervisor exiting!\n", NULL);
 	pthread_mutex_unlock(&ruleset->ruleset_lock);
 }
+
+void	monitor(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->philo_lock);
+	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	while ((philo->status != replete && philo->status != dead) ||
+	!philo->ruleset->stop)
+	{
+		pthread_mutex_unlock(&philo->philo_lock);
+		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+		pthread_mutex_lock(&philo->philo_lock);
+		if (philo->status != replete && philo->status != eating && (u_int64_t)
+		(get_time()
+		> philo->time_remaining))
+		{
+			philo->status = dead;
+			ft_mprintf("has died\n", philo);
+			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+			philo->ruleset->stop = 1;
+			pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+		}
+		pthread_mutex_unlock(&philo->philo_lock);
+		pthread_mutex_lock(&philo->philo_lock);
+		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	}
+	pthread_mutex_unlock(&philo->philo_lock);
+	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+}
