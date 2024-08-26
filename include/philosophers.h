@@ -43,7 +43,7 @@ struct	s_philo;
 /*!
  * @brief
  * @var	number_of_philosophers The total number of philosophers.
- * @var	*philos Pointer to the table of philosophers.
+ * @var	*philos_array Pointer to the table of philosophers.
  * @var	time_to_die Max time before a philo dies of starvation.
  * @var	time_to_eat Duration of a meal.
  * @var	time_to_sleep Duration of a nap.
@@ -54,15 +54,15 @@ struct	s_philo;
  */
 typedef struct	s_ruleset
 {
-	pthread_t		*tid;
 	int				number_of_philosophers;
-	int				max_meals;
-	bool 			dead_philo;
-	bool			stop;
-	struct s_philo	*philos;
+	struct s_philo	*philos_array;
 	time_t			time_to_die;
 	time_t			time_to_eat;
 	time_t			time_to_sleep;
+	int				max_meals;
+	time_t			start_time;
+	int				nb_replete_philos;
+	bool			stop;
 	pthread_mutex_t	ruleset_lock;
 }				t_ruleset;
 
@@ -70,7 +70,7 @@ typedef struct	s_ruleset
 /// @var	*ruleset Pointer to the structure holding the ruleset for the simu.
 /// @var	id The philosopher unique ID.
 /// @var	tid The thread ID for the corresponding philosopher.
-/// @var	remaining_time Last meal's timestamp.
+/// @var	last_meal Last meal's timestamp.
 /// @var	status The philosopher's status
 /// @var	is_replete Flag that signals if the philo ate `max_meals` meals.
 /// @var	nb_of_meals Number of meals the philosopher ate.
@@ -80,21 +80,20 @@ typedef struct	s_ruleset
 typedef struct	s_philo
 {
 	t_ruleset		*ruleset;
-	pthread_t		supervis;
 	int				id;
+	pthread_t		tid;
+	pthread_t		observator;
+	time_t			last_meal;
+	t_states 		status;
 	int				nb_of_meals;
-	bool			is_replete;
-	bool			is_eating;
-	time_t			remaining_time;
 	pthread_mutex_t	philo_lock;
-	pthread_mutex_t	*r_fork;
-	pthread_mutex_t	*l_fork;
+	struct	s_philo	*neighbor;
 }				t_philo;
 
 //----- INITIALISATION -----//
 t_error	check_input(char *argv[]);
 t_error	init_philos(t_ruleset *ruleset);
-t_error	thread_handling(t_ruleset *ruleset);
+t_error	init_simu(t_ruleset *ruleset);
 t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
 
 //----- ROUTINE -----//
@@ -105,8 +104,7 @@ void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
 //----- SUPERVISOR -----//
-void	monitoring(t_ruleset *ruleset);
-void	supervisor(t_philo *philo);
+void	supervisor(t_ruleset *ruleset);
 
 //----- UTILS -----//
 bool	check_stop(t_philo *philo);
