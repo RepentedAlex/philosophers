@@ -11,25 +11,25 @@
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
-#define PHILOSOPHERS_H
+# define PHILOSOPHERS_H
 
-#include <pthread.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/time.h>
+# include <pthread.h>
+# include <stdbool.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <unistd.h>
+# include <sys/time.h>
 
-#define MIN_PHILO 1
-#define MAX_PHILO 200
+# define MIN_PHILO 1
+# define MAX_PHILO 200
 
-typedef bool t_error;
+typedef bool	t_error;
 
-#define ERROR 1
-#define NO_ERROR 0
+# define ERROR 1
+# define NO_ERROR 0
 
-typedef enum	e_states
+typedef enum e_states
 {
 	dead = -1,
 	sleeping = 0,
@@ -38,7 +38,7 @@ typedef enum	e_states
 	replete = 3
 }				t_states;
 
-struct	s_philo;
+struct			s_philo;
 
 /*!
  * @brief
@@ -52,7 +52,7 @@ struct	s_philo;
  * @var	nb_replete_philos Counter for the number of philos that are replete.
  * @var	stop Flag that signals the end of the simulation.
  */
-typedef struct	s_ruleset
+typedef struct s_ruleset
 {
 	int				number_of_philosophers;
 	struct s_philo	*philos_array;
@@ -77,38 +77,37 @@ typedef struct	s_ruleset
 /// @var	fork Mutex for the philosopher's fork.
 /// @var	philo_lock
 /// @var	*neighbor[2] Pointers to the philosopher's neighbor.
-typedef struct	s_philo
+typedef struct s_philo
 {
 	t_ruleset		*ruleset;
 	int				id;
 	pthread_t		tid;
 	pthread_t		observator;
-//	time_t			last_meal;
-	t_states 		status;
-	u_int64_t 		time_remaining;
+	t_states		status;
+	u_int64_t		time_remaining;
 	u_int64_t		time_to_think;
 	int				nb_of_meals;
 	pthread_mutex_t	philo_lock;
 	pthread_mutex_t	fork;
-	struct	s_philo	*neighbor;
+	struct s_philo	*neighbor;
 }				t_philo;
 
 //----- INITIALISATION -----//
-t_error	check_input(char *argv[]);
-t_error	init_philos(t_ruleset *ruleset);
-t_error	init_simu(t_ruleset *ruleset);
-t_error parsing(int argc, t_ruleset *ruleset, char *argv[]);
+t_error		check_input(char *argv[]);
+t_error		init_philos(t_ruleset *ruleset);
+t_error		init_simu(t_ruleset *ruleset);
+t_error		parsing(int argc, t_ruleset *ruleset, char *argv[]);
 
 //----- ROUTINE -----//
-void	lonely_philo(t_philo *philo);
-void 	routine(t_philo *philo);
-int 	philo_eat(t_philo *philo);
-void	philo_sleep(t_philo *philo);
-void	philo_think(t_philo *philo);
+void		lonely_philo(t_philo *philo);
+void		routine(t_philo *philo);
+int			philo_eat(t_philo *philo);
+void		philo_sleep(t_philo *philo);
+void		philo_think(t_philo *philo);
 
 //----- SUPERVISOR -----//
-void	monitor(t_philo *philo);
-void	supervisor(t_ruleset *ruleset);
+void		monitor(t_philo *philo);
+void		supervisor(t_ruleset *ruleset);
 
 //----- UTILS -----//
 bool		check_stop(t_philo *philo);
@@ -118,7 +117,7 @@ void		ft_error(char *str, t_ruleset *ruleset);
 void		ft_exit(t_ruleset *ruleset);
 int			ft_mprintf(char *str, t_philo *philo);
 u_int64_t	get_time(void);
-int 		ft_usleep(u_int64_t time);
+int			ft_usleep(u_int64_t time);
 void		join_all_threads(t_ruleset *ruleset);
 void		set_philo_dead(t_philo *philo);
 void		set_philo_replete(t_philo *philo);

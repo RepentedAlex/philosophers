@@ -43,13 +43,13 @@ void	monitor(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->philo_lock);
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
-	while ((philo->status != replete && philo->status != dead) &&
+	while ((philo->status != replete && philo->status != dead) && \
 	!philo->ruleset->stop)
 	{
 		pthread_mutex_unlock(&philo->philo_lock);
 		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 		pthread_mutex_lock(&philo->philo_lock);
-		if (philo->status != replete && philo->status != eating && (u_int64_t)
+		if (philo->status != replete && philo->status != eating && (u_int64_t) \
 		(get_time() > philo->time_remaining))
 		{
 			philo->status = dead;
