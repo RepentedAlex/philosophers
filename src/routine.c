@@ -19,7 +19,8 @@ void	routine(t_philo *philo)
 	wait_for_start(philo, &first_round);
 	if (philo->ruleset->number_of_philosophers == 1)
 		return (lonely_philo(philo));
-	if (pthread_create(&philo->observator, NULL, (void *)&monitor, (void *)philo))
+	if (pthread_create(&philo->observator, NULL, (void *)&monitor, \
+	(void *)philo))
 		return ;
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	first_round = 0;
@@ -66,8 +67,8 @@ int	philo_eat(t_philo *philo)
 		return (1);
 	internal_philo_eat(philo);
 	philo->nb_of_meals++;
-	philo->time_remaining = get_time() + philo->ruleset->time_to_die +
-							philo->ruleset->time_to_sleep;
+	philo->time_remaining = get_time() + philo->ruleset->time_to_die + \
+	philo->ruleset->time_to_sleep;
 	philo_sleep(philo);
 	return (0);
 }

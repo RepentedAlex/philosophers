@@ -14,20 +14,20 @@
 
 void	set_philo_dead(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->philo_lock);
 	philo->status = dead;
+	pthread_mutex_unlock(&philo->philo_lock);
 	ft_mprintf("died.\n", philo);
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	philo->ruleset->stop = 1;
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-	pthread_mutex_unlock(&philo->philo_lock);
 }
 
 void	do_first_round(t_philo *philo, int *flag)
 {
-	if (philo->id % 3 == 0)
+	philo_think(philo);
+	if (philo->id % 2 == 0)
 		philo_eat(philo);
-	else
-		philo_think(philo);
 	*flag = 1;
 }
 
