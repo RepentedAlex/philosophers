@@ -41,26 +41,16 @@ void	routine(t_philo *philo)
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 }
 
-static void	internal_philo_eat(t_philo *philo, int neighbor)
+static void	internal_philo_eat(t_philo *philo)
 {
-	if (neighbor == 0)
-	{
-		pthread_mutex_lock(&philo->neighbor[neighbor]->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-		pthread_mutex_lock(&philo->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-	}
-	else
-	{
-		pthread_mutex_lock(&philo->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-		pthread_mutex_lock(&philo->neighbor[neighbor]->philo_lock);
-		ft_mprintf("has taken a fork\n", philo);
-	}
+	pthread_mutex_lock(&philo->neighbor->philo_lock);
+	ft_mprintf("has taken a fork\n", philo);
+	pthread_mutex_lock(&philo->philo_lock);
+	ft_mprintf("has taken a fork\n", philo);
 	philo->status = eating;
 	ft_mprintf("is eating\n", philo);
 	ft_usleep(philo->ruleset->time_to_eat);
-	pthread_mutex_unlock(&philo->neighbor[neighbor]->philo_lock);
+	pthread_mutex_unlock(&philo->neighbor->philo_lock);
 	pthread_mutex_unlock(&philo->philo_lock);
 }
 
@@ -68,12 +58,7 @@ int	philo_eat(t_philo *philo)
 {
 	if (check_stop(philo) == true)
 		return (1);
-	if (philo->id % 2 == 0)
-		internal_philo_eat(philo, 0);
-	else if (philo->id % 1 == 0)
-		internal_philo_eat(philo, 1);
-	else
-		return (1);
+	internal_philo_eat(philo);
 	philo->last_meal = get_time();
 	philo->nb_of_meals++;
 	philo_sleep(philo);

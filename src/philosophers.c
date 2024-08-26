@@ -32,15 +32,13 @@ static void	internal_init_philo(const t_ruleset *ruleset, int i)
 	ruleset->philos_array[i].status = thinking;
 	ruleset->philos_array[i].nb_of_meals = 0;
 	if (i == 0)
-		ruleset->philos_array[i].neighbor[0] = \
+		ruleset->philos_array[i].neighbor = \
 		&ruleset->philos_array[ruleset->number_of_philosophers - 1];
+	else if (i == ruleset->number_of_philosophers - 1)
+		ruleset->philos_array[i].neighbor = \
+		&ruleset->philos_array[0];
 	else
-		ruleset->philos_array[i].neighbor[0] = \
-		&ruleset->philos_array[i - 1];
-	if (i == ruleset->number_of_philosophers - 1)
-		ruleset->philos_array[i].neighbor[1] = &ruleset->philos_array[0];
-	else
-		ruleset->philos_array[i].neighbor[1] = \
+		ruleset->philos_array[i].neighbor = \
 		&ruleset->philos_array[i + 1];
 	pthread_mutex_unlock(&ruleset->philos_array[i].philo_lock);
 }

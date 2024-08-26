@@ -87,7 +87,7 @@ typedef struct	s_philo
 	t_states 		status;
 	int				nb_of_meals;
 	pthread_mutex_t	philo_lock;
-	struct	s_philo	*neighbor[2];
+	struct	s_philo	*neighbor;
 }				t_philo;
 
 //----- INITIALISATION -----//
