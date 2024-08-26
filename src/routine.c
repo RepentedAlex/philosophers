@@ -22,21 +22,13 @@ void	routine(t_philo *philo)
 	if (pthread_create(&philo->observator, NULL, (void *)&monitor, (void *)philo))
 		return ;
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+	first_round = 0;
 	while (!philo->ruleset->stop && philo->status != replete)
 	{
 		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 		if (philo->ruleset->max_meals != -1 && \
 		philo->nb_of_meals >= philo->ruleset->max_meals)
 			return (set_philo_replete(philo));
-		pthread_mutex_lock(&philo->philo_lock);
-//		if (philo->status != eating && (get_time() - philo->last_meal > philo->ruleset->time_to_die))
-//			set_philo_dead(philo);
-//		else
-			pthread_mutex_unlock(&philo->philo_lock);
-//		if (first_round == 0)
-//			do_first_round(philo, &first_round);
-//		else if (philo_eat(philo))
-//			philo_sleep(philo);
 		philo_eat(philo);
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
@@ -46,16 +38,26 @@ void	routine(t_philo *philo)
 
 static void	internal_philo_eat(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->neighbor->philo_lock);
-	ft_mprintf("has taken a fork\n", philo);
-	pthread_mutex_lock(&philo->philo_lock);
-	ft_mprintf("has taken a fork\n", philo);
+	if (philo->id % 2 == 0)
+	{
+		pthread_mutex_lock(&philo->fork);
+		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->neighbor->fork);
+		ft_mprintf("has taken a fork\n", philo);
+	}
+	else
+	{
+		pthread_mutex_lock(&philo->neighbor->fork);
+		ft_mprintf("has taken a fork\n", philo);
+		pthread_mutex_lock(&philo->fork);
+		ft_mprintf("has taken a fork\n", philo);
+	}
 	philo->status = eating;
 	ft_mprintf("is eating\n", philo);
 	ft_mprintf("Updated remaining time\n", philo);
 	ft_usleep(philo->ruleset->time_to_eat);
-	pthread_mutex_unlock(&philo->neighbor->philo_lock);
-	pthread_mutex_unlock(&philo->philo_lock);
+	pthread_mutex_unlock(&philo->neighbor->fork);
+	pthread_mutex_unlock(&philo->fork);
 }
 
 int	philo_eat(t_philo *philo)
@@ -63,7 +65,6 @@ int	philo_eat(t_philo *philo)
 	if (check_stop(philo) == true)
 		return (1);
 	internal_philo_eat(philo);
-//	philo->last_meal = get_time();
 	philo->nb_of_meals++;
 	philo->time_remaining = get_time() + philo->ruleset->time_to_die +
 							philo->ruleset->time_to_sleep;
@@ -90,5 +91,6 @@ void	philo_think(t_philo *philo)
 	if (check_stop(philo) == true)
 		return ;
 	philo->status = thinking;
+	ft_usleep(philo->time_to_think);
 	ft_mprintf("is thinking\n", philo);
 }

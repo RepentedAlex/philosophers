@@ -50,8 +50,7 @@ void	monitor(t_philo *philo)
 		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 		pthread_mutex_lock(&philo->philo_lock);
 		if (philo->status != replete && philo->status != eating && (u_int64_t)
-		(get_time()
-		> philo->time_remaining))
+		(get_time() > (philo->time_remaining + (u_int64_t)15)))
 		{
 			philo->status = dead;
 			ft_mprintf("has died\n", philo);
