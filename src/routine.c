@@ -19,6 +19,8 @@ void	routine(t_philo *philo)
 	wait_for_start(philo, &first_round);
 	if (philo->ruleset->number_of_philosophers == 1)
 		return (lonely_philo(philo));
+	if (pthread_create(&philo->observator, NULL, (void *)&monitor, (void *)philo))
+		return ;
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->stop && philo->status != replete)
 	{
@@ -27,18 +29,19 @@ void	routine(t_philo *philo)
 		philo->nb_of_meals >= philo->ruleset->max_meals)
 			return (set_philo_replete(philo));
 		pthread_mutex_lock(&philo->philo_lock);
-		if (philo->status != eating && (get_time() - \
-		philo->last_meal > philo->ruleset->time_to_die))
-			set_philo_dead(philo);
-		else
+//		if (philo->status != eating && (get_time() - philo->last_meal > philo->ruleset->time_to_die))
+//			set_philo_dead(philo);
+//		else
 			pthread_mutex_unlock(&philo->philo_lock);
-		if (first_round == 0)
-			do_first_round(philo, &first_round);
-		else if (philo_eat(philo))
-			philo_sleep(philo);
+//		if (first_round == 0)
+//			do_first_round(philo, &first_round);
+//		else if (philo_eat(philo))
+//			philo_sleep(philo);
+		philo_eat(philo);
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+	pthread_join(philo->observator, NULL);
 }
 
 static void	internal_philo_eat(t_philo *philo)
@@ -49,6 +52,7 @@ static void	internal_philo_eat(t_philo *philo)
 	ft_mprintf("has taken a fork\n", philo);
 	philo->status = eating;
 	ft_mprintf("is eating\n", philo);
+	ft_mprintf("Updated remaining time\n", philo);
 	ft_usleep(philo->ruleset->time_to_eat);
 	pthread_mutex_unlock(&philo->neighbor->philo_lock);
 	pthread_mutex_unlock(&philo->philo_lock);
@@ -59,8 +63,10 @@ int	philo_eat(t_philo *philo)
 	if (check_stop(philo) == true)
 		return (1);
 	internal_philo_eat(philo);
-	philo->last_meal = get_time();
+//	philo->last_meal = get_time();
 	philo->nb_of_meals++;
+	philo->time_remaining = get_time() + philo->ruleset->time_to_die +
+							philo->ruleset->time_to_sleep;
 	philo_sleep(philo);
 	return (0);
 }

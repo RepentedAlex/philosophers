@@ -79,7 +79,8 @@ int	ft_mprintf(char *str, t_philo *philo)
 	if (!philo)
 		ret = printf("%s", str);
 	else
-		ret = printf("%ld %d %s", get_time(), philo->id, str);
+		ret = printf("%ld %d %s", get_time() - philo->ruleset->start_time, philo->id,
+					 str);
 	pthread_mutex_unlock(&printf_lock);
 	return (ret);
 }

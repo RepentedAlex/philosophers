@@ -12,12 +12,12 @@
 
 #include "philosophers.h"
 
-time_t	get_time(void)
+u_int64_t get_time(void)
 {
 	struct timeval	timeval;
 
 	if (gettimeofday(&timeval, NULL))
-		return ((time_t)NULL);
+		return (ft_error("gettimeofday() failed.\n", NULL), (time_t) NULL);
 	return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
 }
 
@@ -33,8 +33,7 @@ int	ft_usleep(u_int64_t	time)
 
 void	wait_for_start(t_philo *philo, int *first_round)
 {
-	if (first_round)
-		*first_round = 0;
+	*first_round = 0;
 	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->start_time)
 	{
@@ -43,9 +42,7 @@ void	wait_for_start(t_philo *philo, int *first_round)
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-	pthread_mutex_lock(&philo->philo_lock);
-	philo->remaining_time = philo->ruleset->start_time;
-	pthread_mutex_unlock(&philo->philo_lock);
+	philo->time_remaining = get_time() + philo->ruleset->start_time;
 }
 
 bool	check_stop(t_philo *philo)
