@@ -53,7 +53,9 @@ static void	internal_philo_eat(t_philo *philo)
 		pthread_mutex_lock(&philo->fork);
 		ft_mprintf("has taken a fork\n", philo);
 	}
+	pthread_mutex_lock(&philo->philo_lock);
 	philo->status = eating;
+	pthread_mutex_unlock(&philo->philo_lock);
 	ft_mprintf("is eating\n", philo);
 	ft_mprintf("Updated remaining time\n", philo);
 	ft_usleep(philo->ruleset->time_to_eat);
