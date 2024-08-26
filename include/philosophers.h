@@ -86,8 +86,10 @@ typedef struct	s_philo
 //	time_t			last_meal;
 	t_states 		status;
 	u_int64_t 		time_remaining;
+	u_int64_t		time_to_think;
 	int				nb_of_meals;
 	pthread_mutex_t	philo_lock;
+	pthread_mutex_t	fork;
 	struct	s_philo	*neighbor;
 }				t_philo;
 

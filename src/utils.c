@@ -42,6 +42,7 @@ void	ft_exit(t_ruleset *ruleset)
 	while (i < ruleset->number_of_philosophers)
 	{
 		pthread_mutex_destroy(&ruleset->philos_array[i].philo_lock);
+		pthread_mutex_destroy(&ruleset->philos_array[i].fork);
 		i++;
 	}
 	free(ruleset->philos_array);
