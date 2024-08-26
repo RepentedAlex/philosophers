@@ -1,4 +1,5 @@
 build
 .cache_exists
 .idea
+LazyPhilosophersTester
 philo
