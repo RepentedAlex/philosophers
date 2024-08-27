@@ -18,13 +18,11 @@ void	supervisor(t_ruleset *ruleset)
 {
 	while (!ruleset->start_time)
 		ft_usleep(1);
-	ft_mprintf("Supervisor launched!\n", NULL);
-
 	while (1)
 	{
 		pthread_mutex_lock(&ruleset->ruleset_lock);
 		if (ruleset->stop)
-			break;
+			break ;
 		if (ruleset->max_meals != -1 && \
 		ruleset->nb_replete_philos == ruleset->number_of_philosophers)
 		{
@@ -35,7 +33,6 @@ void	supervisor(t_ruleset *ruleset)
 		ft_usleep(10);
 	}
 	pthread_mutex_unlock(&ruleset->ruleset_lock);
-	ft_mprintf("Supervisor exiting!\n", NULL);
 }
 
 void	monitor(t_philo *philo)
@@ -46,7 +43,7 @@ void	monitor(t_philo *philo)
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 		if (philo->status == replete || philo->status == dead || \
 		philo->ruleset->stop)
-			break;
+			break ;
 		if (philo->status != eating && \
 		(u_int64_t)(get_time() > philo->time_remaining))
 		{

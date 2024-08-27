@@ -103,6 +103,8 @@ int	main(int argc, char *argv[])
 		return (ERROR);
 	ruleset->philos_array = malloc(ruleset->number_of_philosophers * sizeof
 			(t_philo));
+	if (!ruleset->philos_array)
+		return (ERROR);
 	if (init_philos(ruleset))
 		return (ERROR);
 	if (init_simu(ruleset))

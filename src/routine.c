@@ -34,7 +34,6 @@ void	routine(t_philo *philo)
 		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	}
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
-	pthread_join(philo->observator, NULL);
 }
 
 static void	internal_philo_eat(t_philo *philo)
@@ -82,7 +81,6 @@ void	philo_sleep(t_philo *philo)
 		return ;
 	pthread_mutex_lock(&philo->philo_lock);
 	if (philo->status == replete)
-
 		return ((void) pthread_mutex_unlock(&philo->philo_lock));
 	else
 		pthread_mutex_unlock(&philo->philo_lock);
@@ -99,12 +97,4 @@ void	philo_think(t_philo *philo)
 	philo_status_updater(philo, thinking);
 	ft_usleep(philo->time_to_think);
 	ft_mprintf("is thinking\n", philo);
-}
-
-
-void	philo_status_updater(t_philo *philo, enum e_states state)
-{
-	pthread_mutex_lock(&philo->philo_lock);
-	philo->status = state;
-	pthread_mutex_unlock(&philo->philo_lock);
 }

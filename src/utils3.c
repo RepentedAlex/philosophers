@@ -60,3 +60,10 @@ void	lonely_philo(t_philo *philo)
 	ft_usleep(philo->ruleset->time_to_die);
 	set_philo_dead(philo);
 }
+
+void	philo_status_updater(t_philo *philo, enum e_states state)
+{
+	pthread_mutex_lock(&philo->philo_lock);
+	philo->status = state;
+	pthread_mutex_unlock(&philo->philo_lock);
+}
