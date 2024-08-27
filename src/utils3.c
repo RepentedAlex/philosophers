@@ -23,14 +23,6 @@ void	set_philo_dead(t_philo *philo)
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 }
 
-void	do_first_round(t_philo *philo, int *flag)
-{
-	philo_think(philo);
-	if (philo->id % 2 == 0)
-		philo_eat(philo);
-	*flag = 1;
-}
-
 /// @brief Checks for invalid characters in the passed arguments.
 /// @param argc Number of CLI arguments.
 /// @param argv CLI arguments.

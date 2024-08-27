@@ -111,7 +111,6 @@ void		supervisor(t_ruleset *ruleset);
 
 //----- UTILS -----//
 bool		check_stop(t_philo *philo);
-void		do_first_round(t_philo *philo, int *flag);
 int			ft_atoi(const char *str);
 void		ft_error(char *str, t_ruleset *ruleset);
 void		ft_exit(t_ruleset *ruleset);
