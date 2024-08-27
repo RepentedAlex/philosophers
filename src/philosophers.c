@@ -108,7 +108,6 @@ int	main(int argc, char *argv[])
 	if (init_simu(ruleset))
 		return (ERROR);
 	supervisor(ruleset);
-	join_all_threads(ruleset);
 	ft_exit(ruleset);
 	return (NO_ERROR);
 }

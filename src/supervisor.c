@@ -19,48 +19,44 @@ void	supervisor(t_ruleset *ruleset)
 	while (!ruleset->start_time)
 		ft_usleep(1);
 	ft_mprintf("Supervisor launched!\n", NULL);
-	pthread_mutex_lock(&ruleset->ruleset_lock);
-	while (!ruleset->stop)
+
+	while (1)
 	{
-		pthread_mutex_unlock(&ruleset->ruleset_lock);
 		pthread_mutex_lock(&ruleset->ruleset_lock);
+		if (ruleset->stop)
+			break;
 		if (ruleset->max_meals != -1 && \
 		ruleset->nb_replete_philos == ruleset->number_of_philosophers)
 		{
 			ft_mprintf("All philos are replete!\n", NULL);
 			ruleset->stop = 1;
-			pthread_mutex_unlock(&ruleset->ruleset_lock);
 		}
-		else
-			pthread_mutex_unlock(&ruleset->ruleset_lock);
-		pthread_mutex_lock(&ruleset->ruleset_lock);
+		pthread_mutex_unlock(&ruleset->ruleset_lock);
+		ft_usleep(10);
 	}
-	ft_mprintf("Supervisor exiting!\n", NULL);
 	pthread_mutex_unlock(&ruleset->ruleset_lock);
+	ft_mprintf("Supervisor exiting!\n", NULL);
 }
 
 void	monitor(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->philo_lock);
-	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
-	while ((philo->status != replete && philo->status != dead) && \
-	!philo->ruleset->stop)
+	while (1)
 	{
-		pthread_mutex_unlock(&philo->philo_lock);
-		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 		pthread_mutex_lock(&philo->philo_lock);
-		if (philo->status != replete && philo->status != eating && (u_int64_t) \
-		(get_time() > philo->time_remaining))
+		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+		if (philo->status == replete || philo->status == dead || \
+		philo->ruleset->stop)
+			break;
+		if (philo->status != eating && \
+		(u_int64_t)(get_time() > philo->time_remaining))
 		{
 			philo->status = dead;
 			ft_mprintf("has died\n", philo);
-			pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 			philo->ruleset->stop = 1;
-			pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
 		}
 		pthread_mutex_unlock(&philo->philo_lock);
-		pthread_mutex_lock(&philo->philo_lock);
-		pthread_mutex_lock(&philo->ruleset->ruleset_lock);
+		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
+		ft_usleep(10);
 	}
 	pthread_mutex_unlock(&philo->philo_lock);
 	pthread_mutex_unlock(&philo->ruleset->ruleset_lock);

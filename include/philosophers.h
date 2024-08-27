@@ -119,6 +119,7 @@ int			ft_mprintf(char *str, t_philo *philo);
 u_int64_t	get_time(void);
 int			ft_usleep(u_int64_t time);
 void		join_all_threads(t_ruleset *ruleset);
+void		philo_status_updater(t_philo *philo, enum e_states state);
 void		set_philo_dead(t_philo *philo);
 void		set_philo_replete(t_philo *philo);
 void		wait_for_start(t_philo *philo, int *first_round);

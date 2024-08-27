@@ -38,6 +38,8 @@ void	ft_exit(t_ruleset *ruleset)
 
 	if (!ruleset)
 		return ;
+	join_all_threads(ruleset);
+	pthread_mutex_destroy(&ruleset->ruleset_lock);
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
@@ -46,7 +48,6 @@ void	ft_exit(t_ruleset *ruleset)
 		i++;
 	}
 	free(ruleset->philos_array);
-	pthread_mutex_destroy(&ruleset->ruleset_lock);
 	free(ruleset);
 }
 

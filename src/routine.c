@@ -22,8 +22,8 @@ void	routine(t_philo *philo)
 	if (pthread_create(&philo->observator, NULL, (void *)&monitor, \
 	(void *)philo))
 		return ;
-	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	first_round = 0;
+	pthread_mutex_lock(&philo->ruleset->ruleset_lock);
 	while (!philo->ruleset->stop && philo->status != replete)
 	{
 		pthread_mutex_unlock(&philo->ruleset->ruleset_lock);
@@ -53,11 +53,8 @@ static void	internal_philo_eat(t_philo *philo)
 		pthread_mutex_lock(&philo->fork);
 		ft_mprintf("has taken a fork\n", philo);
 	}
-	pthread_mutex_lock(&philo->philo_lock);
-	philo->status = eating;
-	pthread_mutex_unlock(&philo->philo_lock);
+	philo_status_updater(philo, eating);
 	ft_mprintf("is eating\n", philo);
-	ft_mprintf("Updated remaining time\n", philo);
 	ft_usleep(philo->ruleset->time_to_eat);
 	pthread_mutex_unlock(&philo->neighbor->fork);
 	pthread_mutex_unlock(&philo->fork);
@@ -68,9 +65,11 @@ int	philo_eat(t_philo *philo)
 	if (check_stop(philo) == true)
 		return (1);
 	internal_philo_eat(philo);
+	pthread_mutex_lock(&philo->philo_lock);
 	philo->nb_of_meals++;
 	philo->time_remaining = get_time() + philo->ruleset->time_to_die + \
 	philo->ruleset->time_to_sleep;
+	pthread_mutex_unlock(&philo->philo_lock);
 	philo_sleep(philo);
 	return (0);
 }
@@ -81,9 +80,13 @@ void	philo_sleep(t_philo *philo)
 		return ;
 	if (check_stop(philo) == true)
 		return ;
+	pthread_mutex_lock(&philo->philo_lock);
 	if (philo->status == replete)
-		return ;
-	philo->status = sleeping;
+
+		return ((void) pthread_mutex_unlock(&philo->philo_lock));
+	else
+		pthread_mutex_unlock(&philo->philo_lock);
+	philo_status_updater(philo, sleeping);
 	ft_mprintf("is sleeping\n", philo);
 	ft_usleep(philo->ruleset->time_to_sleep);
 	philo_think(philo);
@@ -93,7 +96,15 @@ void	philo_think(t_philo *philo)
 {
 	if (check_stop(philo) == true)
 		return ;
-	philo->status = thinking;
+	philo_status_updater(philo, thinking);
 	ft_usleep(philo->time_to_think);
 	ft_mprintf("is thinking\n", philo);
+}
+
+
+void	philo_status_updater(t_philo *philo, enum e_states state)
+{
+	pthread_mutex_lock(&philo->philo_lock);
+	philo->status = state;
+	pthread_mutex_unlock(&philo->philo_lock);
 }
