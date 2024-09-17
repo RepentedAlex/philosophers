@@ -5,92 +5,108 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/13 14:43:51 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/21 17:46:33 by apetitco         ###   ########.fr       */
+/*   Created: 2024/09/13 18:27:55 by apetitco          #+#    #+#             */
+/*   Updated: 2024/09/17 14:17:56 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-/// @brief
-/// @param ruleset A pointer to the ruleset structure.
-/// @return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
-t_error	init_simu(t_ruleset *ruleset)
-{
-	pthread_mutex_lock(&ruleset->ruleset_lock);
-	ruleset->start_time = get_time();
-	pthread_mutex_unlock(&ruleset->ruleset_lock);
-	if (!ruleset->start_time)
-		return (ft_exit(ruleset), ERROR);
-	return (NO_ERROR);
-}
-
-static void	internal_init_philo(const t_ruleset *ruleset, int i)
-{
-	pthread_mutex_lock(&ruleset->philos_array[i].philo_lock);
-	ruleset->philos_array[i].status = thinking;
-	ruleset->philos_array[i].time_to_think = ruleset->time_to_eat / 2;
-	ruleset->philos_array[i].nb_of_meals = 0;
-	if (i == 0)
-		ruleset->philos_array[i].neighbor = \
-		&ruleset->philos_array[ruleset->number_of_philosophers - 1];
-	else if (i == ruleset->number_of_philosophers - 1)
-		ruleset->philos_array[i].neighbor = \
-		&ruleset->philos_array[0];
-	else
-		ruleset->philos_array[i].neighbor = \
-		&ruleset->philos_array[i + 1];
-	pthread_mutex_unlock(&ruleset->philos_array[i].philo_lock);
-}
-
-/// @brief Initialises the array of philos.
-/// @param ruleset A pointer to the ruleset structure.
-/// @return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
-t_error	init_philos(t_ruleset *ruleset)
+void	check_death(t_ruleset *ruleset)
 {
 	int	i;
 
 	i = 0;
 	while (i < ruleset->number_of_philosophers)
 	{
-		ruleset->philos_array[i].ruleset = ruleset;
-		ruleset->philos_array[i].id = i + 1;
-		pthread_create(&ruleset->philos_array[i].tid, NULL, (void *)&routine, \
-		(void *)&ruleset->philos_array[i]);
-		if (!ruleset->philos_array[i].tid)
-			return (ft_exit(ruleset), ERROR);
-		pthread_mutex_init(&ruleset->philos_array[i].philo_lock, NULL);
-		pthread_mutex_init(&ruleset->philos_array[i].fork, NULL);
-		internal_init_philo(ruleset, i);
+		pthread_mutex_lock(&ruleset->philos_array[i].m_last_meal);
+		pthread_mutex_lock(&ruleset->m_eating);
+		if (get_time() > ruleset->philos_array[i].last_meal + \
+			ruleset->time_to_die && !ruleset->philos_array[i].is_eating)
+		{
+			pthread_mutex_unlock(&ruleset->m_eating);
+			pthread_mutex_unlock(&ruleset->philos_array[i].m_last_meal);
+			ft_mprintf("died\n", &ruleset->philos_array[i]);
+			pthread_mutex_lock(&ruleset->philos_array[i].m_status);
+			ruleset->philos_array[i].status = dead;
+			pthread_mutex_unlock(&ruleset->philos_array[i].m_status);
+			pthread_mutex_lock(&ruleset->m_stop);
+			ruleset->stop = true;
+			pthread_mutex_unlock(&ruleset->m_stop);
+			break ;
+		}
+		pthread_mutex_unlock(&ruleset->m_eating);
+		pthread_mutex_unlock(&ruleset->philos_array[i].m_last_meal);
 		i++;
 	}
-	return (NO_ERROR);
 }
 
-/// @brief Fills the corresponding structures with the CLI-provided arguments.
-/// @param argv CLI arguments.
-/// @return ERROR(1) if something went wrong, otherwise returns NO_ERROR(0).
-t_error	parsing(int argc, t_ruleset *ruleset, char *argv[])
+void	supervisor(t_ruleset *ruleset)
 {
-	memset(ruleset, 0, sizeof(t_ruleset));
-	pthread_mutex_init(&ruleset->ruleset_lock, NULL);
-	if (argc != 5 && argc != 6)
-		return (ERROR);
-	ruleset->number_of_philosophers = ft_atoi(argv[1]);
-	ruleset->time_to_die = ft_atoi(argv[2]);
-	ruleset->time_to_eat = ft_atoi(argv[3]);
-	ruleset->time_to_sleep = ft_atoi(argv[4]);
-	if (argc == 6)
-		ruleset->max_meals = ft_atoi(argv[5]);
-	else
-		ruleset->max_meals = -1;
-	if (ruleset->number_of_philosophers < MIN_PHILO || \
-	ruleset->number_of_philosophers > MAX_PHILO)
-		return (ERROR);
-	return (NO_ERROR);
+	while (1)
+	{
+		pthread_mutex_lock(&ruleset->m_stop);
+		if (ruleset->stop == true)
+		{
+			pthread_mutex_unlock(&ruleset->m_stop);
+			break ;
+		}
+		pthread_mutex_unlock(&ruleset->m_stop);
+		check_death(ruleset);
+		pthread_mutex_lock(&ruleset->m_replete);
+		if (ruleset->nb_replete >= ruleset->number_of_philosophers)
+		{
+			pthread_mutex_unlock(&ruleset->m_replete);
+			pthread_mutex_lock(&ruleset->m_stop);
+			ruleset->stop = true;
+			pthread_mutex_unlock(&ruleset->m_stop);
+		}
+		else
+			pthread_mutex_unlock(&ruleset->m_replete);
+		usleep(1);
+	}
 }
 
-int	main(int argc, char *argv[])
+bool	should_i_stop(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->ruleset->m_stop);
+	pthread_mutex_lock(&philo->m_status);
+	if (philo->ruleset->stop || philo->status == dead)
+	{
+		pthread_mutex_unlock(&philo->ruleset->m_stop);
+		pthread_mutex_unlock(&philo->m_status);
+		return (true);
+	}
+	pthread_mutex_unlock(&philo->ruleset->m_stop);
+	pthread_mutex_unlock(&philo->m_status);
+	return (false);
+}
+
+void	*routine(void *v_philo)
+{
+	t_philo	*philo;
+
+	philo = v_philo;
+	wait_for_start(philo->ruleset);
+	if (philo->ruleset->number_of_philosophers == 1)
+	{
+		pthread_mutex_lock(&philo->m_status);
+		while (philo->status != dead)
+		{
+			pthread_mutex_unlock(&philo->m_status);
+			usleep(philo->ruleset->time_to_die);
+			pthread_mutex_lock(&philo->m_status);
+		}
+		pthread_mutex_unlock(&philo->m_status);
+	}
+	if (philo->id % 2)
+		usleep(100);
+	while (!should_i_stop(philo))
+		philo_eat(philo);
+	return (NULL);
+}
+
+int	main(const int argc, char *argv[])
 {
 	t_ruleset	*ruleset;
 
@@ -98,18 +114,17 @@ int	main(int argc, char *argv[])
 	if (!ruleset)
 		return (ERROR);
 	if (check_input(argv))
-		return (ERROR);
+		return (free(ruleset), ERROR);
 	if (parsing(argc, ruleset, argv))
-		return (ERROR);
-	ruleset->philos_array = malloc(ruleset->number_of_philosophers * sizeof
-			(t_philo));
+		return (free(ruleset), ERROR);
+	ruleset->philos_array = malloc(ruleset->number_of_philosophers * \
+		sizeof(t_philo));
 	if (!ruleset->philos_array)
-		return (ERROR);
-	if (init_philos(ruleset))
-		return (ERROR);
-	if (init_simu(ruleset))
-		return (ERROR);
-	supervisor(ruleset);
-	ft_exit(ruleset);
-	return (NO_ERROR);
+		return (free(ruleset), ERROR);
+	ft_init_philos(ruleset);
+	if (ft_mutex_initialise(ruleset))
+		return (ft_exit(ruleset), ERROR);
+	if (ft_thread_initialise(ruleset))
+		return (ft_exit(ruleset), ERROR);
+	return (ft_exit(ruleset), NO_ERROR);
 }

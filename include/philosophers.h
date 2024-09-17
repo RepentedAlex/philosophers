@@ -5,14 +5,15 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/13 14:42:44 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/13 14:42:44 by apetitco         ###   ########.fr       */
+/*   Created: 2024/09/13 18:28:18 by apetitco          #+#    #+#             */
+/*   Updated: 2024/09/17 13:52:29 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
+# include <limits.h>
 # include <pthread.h>
 # include <stdbool.h>
 # include <stdio.h>
@@ -40,18 +41,6 @@ typedef enum e_states
 
 struct			s_philo;
 
-/*!
- * @brief
- * @var	number_of_philosophers The total number of philosophers.
- * @var	*philos_array Pointer to the table of philosophers.
- * @var	time_to_die Max time before a philo dies of starvation.
- * @var	time_to_eat Duration of a meal.
- * @var	time_to_sleep Duration of a nap.
- * @var	max_meals Number of meals a philo must eat to be replete.
- * @var	start_time Simulation start timestamp.
- * @var	nb_replete_philos Counter for the number of philos that are replete.
- * @var	stop Flag that signals the end of the simulation.
- */
 typedef struct s_ruleset
 {
 	int				number_of_philosophers;
@@ -61,66 +50,60 @@ typedef struct s_ruleset
 	u_int64_t		time_to_sleep;
 	int				max_meals;
 	u_int64_t		start_time;
-	int				nb_replete_philos;
+	pthread_mutex_t	m_start;
+	int				nb_replete;
+	pthread_mutex_t	m_replete;
 	bool			stop;
-	pthread_mutex_t	ruleset_lock;
+	pthread_mutex_t	m_stop;
+	pthread_mutex_t	m_eating;
 }				t_ruleset;
 
-/// @brief	Structure bearing
-/// @var	*ruleset Pointer to the structure holding the ruleset for the simu.
-/// @var	id The philosopher unique ID.
-/// @var	tid The thread ID for the corresponding philosopher.
-/// @var	last_meal Last meal's timestamp.
-/// @var	status The philosopher's status
-/// @var	is_replete Flag that signals if the philo ate `max_meals` meals.
-/// @var	nb_of_meals Number of meals the philosopher ate.
-/// @var	fork Mutex for the philosopher's fork.
-/// @var	philo_lock
-/// @var	*neighbor[2] Pointers to the philosopher's neighbor.
 typedef struct s_philo
 {
 	t_ruleset		*ruleset;
 	int				id;
 	pthread_t		tid;
-	pthread_t		observator;
 	t_states		status;
-	u_int64_t		time_remaining;
-	u_int64_t		time_to_think;
+	pthread_mutex_t	m_status;
+	u_int64_t		last_meal;
+	pthread_mutex_t	m_last_meal;
 	int				nb_of_meals;
-	pthread_mutex_t	philo_lock;
-	pthread_mutex_t	fork;
+	int				is_eating;
+	pthread_mutex_t	m_nb_of_meals;
+	pthread_mutex_t	m_fork;
 	struct s_philo	*neighbor;
 }				t_philo;
 
-//----- INITIALISATION -----//
+//===== INITIALISATION PHASE =====//
 t_error		check_input(char *argv[]);
-t_error		init_philos(t_ruleset *ruleset);
-t_error		init_simu(t_ruleset *ruleset);
 t_error		parsing(int argc, t_ruleset *ruleset, char *argv[]);
+t_error		ft_init_philos(t_ruleset *ruleset);
+t_error		ft_mutex_initialise(t_ruleset *ruleset);
+t_error		ft_thread_initialise(t_ruleset *ruleset);
 
-//----- ROUTINE -----//
-void		lonely_philo(t_philo *philo);
-void		routine(t_philo *philo);
-int			philo_eat(t_philo *philo);
+//===== ROUTINE =====//
+void		*routine(void *v_philo);
+bool		should_i_stop(t_philo *philo);
+void		philo_eat(t_philo *philo);
+void		edge_handler(t_philo *philo, pthread_mutex_t **fir_fork, \
+pthread_mutex_t **sec_fork);
+void		three_philos(t_philo *philo, pthread_mutex_t **fir_fork, \
+pthread_mutex_t **sec_fork);
 void		philo_sleep(t_philo *philo);
 void		philo_think(t_philo *philo);
-
-//----- SUPERVISOR -----//
-void		monitor(t_philo *philo);
 void		supervisor(t_ruleset *ruleset);
+void		increment_replete_philos(t_philo *philo);
+void		update_philo(t_philo *philo);
 
-//----- UTILS -----//
-bool		check_stop(t_philo *philo);
-int			ft_atoi(const char *str);
-void		ft_error(char *str, t_ruleset *ruleset);
+//===== EXIT =====//
+t_error		join_all_threads(t_ruleset *ruleset);
 void		ft_exit(t_ruleset *ruleset);
+
+//===== UTILITARIES =====//
+int			ft_atoi(const char *str);
 int			ft_mprintf(char *str, t_philo *philo);
+//void		ft_usleep(u_int64_t	time);
 u_int64_t	get_time(void);
-int			ft_usleep(u_int64_t time);
-void		join_all_threads(t_ruleset *ruleset);
-void		philo_status_updater(t_philo *philo, enum e_states state);
-void		set_philo_dead(t_philo *philo);
-void		set_philo_replete(t_philo *philo);
-void		wait_for_start(t_philo *philo, int *first_round);
+void		wait_for_start(t_ruleset *ruleset);
 
 #endif

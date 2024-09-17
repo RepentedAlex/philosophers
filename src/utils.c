@@ -5,16 +5,22 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: apetitco <apetitco@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/13 16:57:34 by apetitco          #+#    #+#             */
-/*   Updated: 2024/08/13 16:57:34 by apetitco         ###   ########.fr       */
+/*   Created: 2024/09/13 18:46:24 by apetitco          #+#    #+#             */
+/*   Updated: 2024/09/13 18:46:27 by apetitco         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-/// \brief Converts a string-written number into an int.
-/// \param str The number written in an array of character.
-/// \return The number in an integer.
+void	ft_usleep(u_int64_t	time)
+{
+	u_int64_t	start;
+
+	start = get_time();
+	while ((get_time() - start) < time)
+		usleep(time / 10);
+}
+
 int	ft_atoi(const char *str)
 {
 	int	i;
@@ -32,48 +38,24 @@ int	ft_atoi(const char *str)
 	return (ret);
 }
 
-void	ft_exit(t_ruleset *ruleset)
+t_error	check_input(char *argv[])
 {
 	int	i;
+	int	j;
 
-	if (!ruleset)
-		return ;
-	join_all_threads(ruleset);
-	pthread_mutex_lock(&ruleset->ruleset_lock);
-	pthread_mutex_unlock(&ruleset->ruleset_lock);
-	pthread_mutex_destroy(&ruleset->ruleset_lock);
-	i = 0;
-	while (i < ruleset->number_of_philosophers)
+	i = 1;
+	while (argv[i])
 	{
-		if (ruleset->philos_array)
+		j = 0;
+		while (argv[i][j])
 		{
-			pthread_mutex_destroy(&ruleset->philos_array[i].philo_lock);
-			pthread_mutex_destroy(&ruleset->philos_array[i].fork);
+			if (argv[i][j] < '0' || argv[i][j] > '9')
+				return (ERROR);
+			j++;
 		}
 		i++;
 	}
-	if (ruleset->philos_array)
-		free(ruleset->philos_array);
-	free(ruleset);
-}
-
-void	join_all_threads(t_ruleset *ruleset)
-{
-	int	i;
-
-	i = 0;
-	while (i < ruleset->number_of_philosophers)
-	{
-		pthread_join(ruleset->philos_array[i].tid, NULL);
-		pthread_join(ruleset->philos_array[i].observator, NULL);
-		i++;
-	}
-}
-
-void	ft_error(char *str, t_ruleset *ruleset)
-{
-	printf("%s\n", str);
-	ft_exit(ruleset);
+	return (NO_ERROR);
 }
 
 int	ft_mprintf(char *str, t_philo *philo)
@@ -82,11 +64,25 @@ int	ft_mprintf(char *str, t_philo *philo)
 	int						ret;
 
 	pthread_mutex_lock(&printf_lock);
-	if (!philo)
-		ret = printf("%s", str);
-	else
-		ret = printf("%ld %d %s", get_time() - philo->ruleset->start_time, \
-		philo->id, str);
+	pthread_mutex_lock(&philo->ruleset->m_stop);
+	if (philo->ruleset->stop)
+	{
+		pthread_mutex_unlock(&printf_lock);
+		pthread_mutex_unlock(&philo->ruleset->m_stop);
+		return (0);
+	}
+	pthread_mutex_unlock(&philo->ruleset->m_stop);
+	ret = printf("%ld %d %s", get_time() - philo->ruleset->start_time, \
+	philo->id, str);
 	pthread_mutex_unlock(&printf_lock);
 	return (ret);
+}
+
+u_int64_t	get_time(void)
+{
+	struct timeval	timeval;
+
+	if (gettimeofday(&timeval, NULL))
+		return (-1);
+	return (timeval.tv_sec * 1000 + timeval.tv_usec / 1000);
 }
